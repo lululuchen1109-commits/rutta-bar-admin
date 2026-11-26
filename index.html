@@ -3,94 +3,104 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rutta Bar Admin · 团队声纹与硬件后台</title>
+  <title>Rutta · macOS 桌面端应用（员工端 / 管理员端）</title>
   <link rel="icon" type="image/svg+xml" href="assets/monogram.svg">
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <!-- Optional macOS Menu Bar (off by default, toggleable in Shot Director for screen recording) -->
-  <div class="os-menubar" id="macos-menubar" hidden>
+<body class="has-menubar">
+  <!-- Native macOS Top Menu Bar (ON by default for Mac App presentation; toggleable in Shot Director) -->
+  <header class="os-menubar" id="macos-menubar">
     <div class="osm-left">
       <span class="osm-apple" aria-hidden="true"></span>
-      <strong>Rutta Bar</strong>
+      <strong>Rutta</strong>
       <span data-i18n="menuFile">文件</span>
       <span data-i18n="menuEdit">编辑</span>
       <span data-i18n="menuView">视图</span>
+      <span data-i18n="menuWindow">窗口</span>
+      <span data-i18n="menuHelp">帮助</span>
     </div>
     <div class="osm-right">
       <button type="button" class="osm-rutta" id="menubar-rutta-btn" aria-expanded="false">
-        <img src="assets/monogram.svg" alt="" width="10" height="13">
+        <img src="assets/monogram.svg" alt="" width="9" height="12">
         <span class="dot dot-ready" id="mb-status-dot"></span>
         <span id="mb-status-label">待机中</span>
       </button>
+      <span class="osm-sys-icon" aria-hidden="true">
+        <svg viewBox="0 0 16 12" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linecap="round"><path d="M1.5 4.2a9.5 9.5 0 0113 0M4 6.8a6 6 0 018 0M6.5 9.4a2.5 2.5 0 013 0"/></svg>
+      </span>
+      <span class="osm-sys-icon" aria-hidden="true">
+        <svg viewBox="0 0 20 12" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="1" y="2" width="15" height="8" rx="2"/><rect x="3" y="4" width="10" height="4" rx="0.8" fill="currentColor" stroke="none"/><path d="M18 4.5v3" stroke-linecap="round"/></svg>
+      </span>
       <span class="osm-clock">Thu 14:22</span>
     </div>
+
+    <!-- Native macOS Menu Bar Companion Popover -->
     <div class="osm-popover" id="menubar-popover" hidden>
       <div class="osmp-head">
         <div>
-          <div class="osmp-title">Rutta Bar · Silver</div>
-          <div class="osmp-sub" id="mbp-sub">USB-C 已连接 · 呼吸绿灯</div>
+          <div class="osmp-title" id="mbp-title">Rutta Bar · 午夜</div>
+          <div class="osmp-sub" id="mbp-sub">USB-C 已连接 · 本机在线</div>
         </div>
-        <span class="badge badge-neutral" id="mbp-pill">待机中</span>
+        <span class="badge badge-green" id="mbp-pill">待机绿灯</span>
       </div>
-      <div class="osmp-bar"><img id="mbp-bar-img" src="assets/switch-photo-ready.webp" alt="Rutta Bar"></div>
+      <div class="osmp-bar">
+        <img id="mbp-bar-img" src="assets/switch-photo-ready.webp" alt="Rutta Bar">
+      </div>
+      <div class="osmp-row">
+        <span data-i18n="mbpPeerQuick">允许被同事设备收录</span>
+        <button type="button" class="toggle" role="switch" aria-checked="true" id="mbp-toggle-peer"></button>
+      </div>
       <div class="osmp-foot">
         <button type="button" class="btn btn-secondary btn-xs" id="mbp-toggle-mute" data-i18n="mbpMuteBtn">物理静音</button>
-        <button type="button" class="btn btn-secondary btn-xs" id="mbp-trigger-card" data-i18n="mbpCardBtn">最近记录</button>
+        <button type="button" class="btn btn-secondary btn-xs" id="mbp-toggle-pause" data-i18n="mbpPauseBtn">免收录 30m</button>
       </div>
     </div>
-  </div>
+  </header>
 
-  <!-- Floating Top-Right Notification Card (for live capture / visitor notice) -->
+  <!-- Floating Top-Right macOS Notification Banner -->
   <aside class="float-notice" id="floating-card" aria-live="polite" hidden></aside>
 
-  <!-- Main Admin Console Shell -->
-  <div class="admin-shell">
-    <!-- Left Navigation Rail -->
-    <aside class="rail" aria-label="Primary Navigation">
-      <div class="rail-header">
-        <div class="brand-row">
-          <div class="brand-icon"><img src="assets/monogram.svg" alt="Rutta" width="15" height="19"></div>
-          <div class="brand-copy">
-            <div class="brand-title">Rutta Bar</div>
-            <div class="brand-org">Northstar Studio</div>
-          </div>
+  <!-- Main macOS Native App Window -->
+  <div class="app-shell">
+    <!-- Left Native macOS Sidebar -->
+    <aside class="rail" aria-label="Application Sidebar">
+      <div class="rail-window-bar">
+        <div class="traffic-lights" aria-hidden="true">
+          <span class="tl tl-close"></span>
+          <span class="tl tl-min"></span>
+          <span class="tl tl-max"></span>
+        </div>
+        <div class="brand-inline">
+          <img src="assets/monogram.svg" alt="Rutta" width="12" height="15">
+          <span class="brand-name">Rutta</span>
+          <span class="brand-sep">·</span>
+          <span class="brand-org">Northstar</span>
         </div>
       </div>
 
-      <nav class="rail-nav" role="tablist" aria-orientation="vertical">
-        <div class="rail-group-label" data-i18n="railGroupCore">团队管理</div>
-        <button type="button" class="rail-item is-active" data-tab="voiceprints" role="tab" aria-selected="true">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M4 10v0M7 7v6M10 4.5v11M13 7v6M16 10v0"/></svg>
-          <span data-i18n="navVoiceprints">声纹管理</span>
-          <span class="rail-count" id="nav-count-vp">5</span>
-        </button>
-        <button type="button" class="rail-item" data-tab="decisions" role="tab" aria-selected="false">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="13" height="13" rx="2.5"/><path d="M7 10.2l2 2 4-4.2"/></svg>
-          <span data-i18n="navDecisions">决定与记录</span>
-          <span class="rail-count is-accent" id="nav-count-pending">2</span>
-        </button>
+      <!-- Perspective / Role Switcher (Employee App vs Workspace Admin) -->
+      <div class="role-block">
+        <div class="role-seg" role="group" aria-label="Role Perspective">
+          <button type="button" class="role-btn is-active" data-role="employee" data-i18n="roleEmployee">员工端</button>
+          <button type="button" class="role-btn" data-role="admin" data-i18n="roleAdmin">管理者</button>
+        </div>
+        <div class="role-identity" id="role-identity">
+          <!-- Renders Employee A/B switcher or Admin scope badge -->
+        </div>
+      </div>
 
-        <div class="rail-group-label" data-i18n="railGroupSystem">硬件与系统</div>
-        <button type="button" class="rail-item" data-tab="devices" role="tab" aria-selected="false">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.8" width="15" height="6.4" rx="2.4"/><circle cx="6.2" cy="10" r="0.95" fill="currentColor" stroke="none"/><path d="M10.8 10h3.2"/></svg>
-          <span data-i18n="navDevices">设备管理</span>
-          <span class="rail-count">4</span>
-        </button>
-        <button type="button" class="rail-item" data-tab="integrations" role="tab" aria-selected="false">
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="10" cy="14" r="2"/><path d="M7.6 7.4L9.2 12.2M12.4 7.4l-1.6 4.8M8 6h4"/></svg>
-          <span data-i18n="navIntegrations">集成与隐私</span>
-        </button>
-      </nav>
+      <!-- Role-specific Navigation -->
+      <nav class="rail-nav" id="rail-nav" role="tablist" aria-orientation="vertical"></nav>
 
+      <!-- Sidebar Footer: Live Hardware Status + Language + Shot Director -->
       <div class="rail-footer">
-        <div class="rail-device-status" id="rail-device-status">
+        <button type="button" class="rail-device-status" id="rail-device-status">
           <span class="dot dot-ready" id="sidebar-led-dot"></span>
           <div class="rds-copy">
-            <div class="rds-title" id="sidebar-hw-label">4 台 Bar 在线</div>
-            <div class="rds-sub" data-i18n="sidebarSub">声纹门禁已开启</div>
+            <div class="rds-title" id="sidebar-hw-label">本机 Rutta Bar 在线</div>
+            <div class="rds-sub" id="sidebar-hw-sub">USB-C 已连接 · 待机绿灯</div>
           </div>
-        </div>
+        </button>
 
         <div class="rail-bottom-bar">
           <div class="lang-seg" role="group" aria-label="Language">
@@ -109,25 +119,21 @@
     <div class="workspace">
       <header class="ws-topbar">
         <div class="ws-topbar-left">
-          <h1 class="ws-title" id="topbar-title">声纹管理</h1>
-          <span class="ws-subtitle" id="topbar-subtitle">仅识别已加入团队成员，访客声音不亮灯、不留存</span>
+          <h1 class="ws-title" id="topbar-title">我的声纹与权限</h1>
+          <span class="ws-subtitle" id="topbar-subtitle">管理本机 Rutta Bar、声纹状态与跨设备被收录授权</span>
         </div>
-        <div class="ws-topbar-right" id="topbar-actions">
-          <!-- Context-aware action button -->
-        </div>
+        <div class="ws-topbar-right" id="topbar-actions"></div>
       </header>
 
-      <main class="ws-content" id="view-container">
-        <!-- Active view renders here -->
-      </main>
+      <main class="ws-content" id="view-container"></main>
 
       <footer class="ws-footer">
-        <span data-i18n="disclaimerText">Rutta Bar 概念管理后台 · 页面中人物、声纹与对话均为模拟数据</span>
+        <span data-i18n="disclaimerText">Rutta macOS 概念应用 · 页面中人物、声纹与对话均为模拟数据</span>
       </footer>
     </div>
   </div>
 
-  <!-- Right-Side Member Voiceprint Inspector Drawer -->
+  <!-- Right-Side Member Voiceprint Inspector Drawer (Admin) -->
   <div class="drawer-backdrop" id="member-drawer-backdrop" hidden>
     <aside class="inspector-drawer" id="member-drawer" role="dialog" aria-modal="true" aria-label="Member Voiceprint Details"></aside>
   </div>
@@ -138,7 +144,7 @@
       <div class="modal-header">
         <div>
           <h2 id="enroll-modal-title" data-i18n="enrollTitle">添加成员声纹</h2>
-          <p class="modal-desc" data-i18n="enrollSub">朗读一句示例完成声纹绑定，成员随时可暂停或删除退出。</p>
+          <p class="modal-desc" data-i18n="enrollSub">朗读一句示例完成声纹绑定，成员随时可在个人端暂停、关闭他人收录或彻底退出。</p>
         </div>
         <button type="button" class="icon-btn" id="enroll-close" aria-label="Close">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
@@ -199,7 +205,7 @@
       </div>
       <div class="modal-body">
         <p class="del-title" id="delete-desc"></p>
-        <p class="del-body" data-i18n="deleteNote">移除后，Rutta Bar 将立即销毁该声纹。此后该成员在设备旁说话时，状态灯不会亮起，也不会转写或留存任何音频；历史已确认的团队文字记录不受影响。</p>
+        <p class="del-body" data-i18n="deleteNote">移除后，Rutta Bar 将立即销毁该声纹。此后该成员在任何设备旁说话时，状态灯均不会亮起，也不会转写或留存任何音频；历史已确认的团队文字记录不受影响。</p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-ghost" id="delete-cancel" data-i18n="cancel">取消</button>
@@ -213,20 +219,20 @@
     <div class="dp-top">
       <div>
         <strong data-i18n="ddTitle">内容部拍摄分镜</strong>
-        <span data-i18n="ddSub">一键触发宣发核心镜头 · 按 H 隐藏辅助入口</span>
+        <span data-i18n="ddSub">一键切换角色与核心镜头 · 按 H 隐藏辅助入口</span>
       </div>
       <button type="button" class="icon-btn" id="director-close" aria-label="Close">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
       </button>
     </div>
     <div class="dp-list">
-      <button type="button" class="dp-btn" data-shot="sceneD">
-        <span class="dp-k">D · L2</span>
-        <div><strong data-i18n="shotDTitle">访客开口 · 灯不亮</strong><small data-i18n="shotDDesc">跳到设备自检并弹出未记录拦截提示</small></div>
+      <button type="button" class="dp-btn" data-shot="scenePeerBlock">
+        <span class="dp-k">B · 授权</span>
+        <div><strong data-i18n="shotPeerTitle">员工 B 关闭“可被他人收录”</strong><small data-i18n="shotPeerDesc">小会时 A 的设备自动忽略 B 的声音，不亮灯不留存</small></div>
       </button>
-      <button type="button" class="dp-btn" data-shot="sceneS1">
-        <span class="dp-k">S1</span>
-        <div><strong data-i18n="shotS1Title">物理静音 · 露出橙标</strong><small data-i18n="shotS1Desc">拨动侧边机械滑键，顶灯熄灭</small></div>
+      <button type="button" class="dp-btn" data-shot="sceneAdminLock">
+        <span class="dp-k">R · 权限</span>
+        <div><strong data-i18n="shotAdminTitle">切到管理者端 · 零原始音频</strong><small data-i18n="shotAdminDesc">隐藏未确认私密讨论，原话录音区永久锁定</small></div>
       </button>
       <button type="button" class="dp-btn" data-shot="sceneA">
         <span class="dp-k">A · F4</span>
@@ -234,7 +240,15 @@
       </button>
       <button type="button" class="dp-btn" data-shot="sceneC">
         <span class="dp-k">C · F1</span>
-        <div><strong data-i18n="shotCTitle">谁记错了 · 听原话</strong><small data-i18n="shotCDesc">定位时间戳并播放原声波形</small></div>
+        <div><strong data-i18n="shotCTitle">谁记错了 · 在场成员听原话</strong><small data-i18n="shotCDesc">员工端定位时间戳并播放原声波形</small></div>
+      </button>
+      <button type="button" class="dp-btn" data-shot="sceneD">
+        <span class="dp-k">D · L2</span>
+        <div><strong data-i18n="shotDTitle">外部访客开口 · 灯不亮</strong><small data-i18n="shotDDesc">设备检测演示访客拦截与未记录提示</small></div>
+      </button>
+      <button type="button" class="dp-btn" data-shot="sceneS1">
+        <span class="dp-k">S1</span>
+        <div><strong data-i18n="shotS1Title">物理静音 · 露出橙标</strong><small data-i18n="shotS1Desc">拨动侧边机械滑键，顶灯熄灭</small></div>
       </button>
       <button type="button" class="dp-btn" data-shot="sceneE">
         <span class="dp-k">E · F2</span>
@@ -242,11 +256,11 @@
       </button>
       <button type="button" class="dp-btn" data-shot="sceneL4">
         <span class="dp-k">L4</span>
-        <div><strong data-i18n="shotL4Title">三台 Mac 同步亮灯</strong><small data-i18n="shotL4Desc">工位多人讨论自动合并去重</small></div>
+        <div><strong data-i18n="shotL4Title">三台 Mac 同步亮灯去重</strong><small data-i18n="shotL4Desc">工位多人讨论自动合并为一条记录</small></div>
       </button>
     </div>
     <div class="dp-checks">
-      <label><input type="checkbox" id="toggle-menubar"><span data-i18n="ddToggleMenubar">显示模拟 macOS 顶部菜单栏</span></label>
+      <label><input type="checkbox" id="toggle-menubar" checked><span data-i18n="ddToggleMenubar">显示 macOS 顶部菜单栏（真机录屏可关）</span></label>
       <label><input type="checkbox" id="toggle-sound" checked><span data-i18n="ddToggleSound">物理滑键拨动微音效</span></label>
     </div>
     <div class="dp-foot">

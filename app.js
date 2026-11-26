@@ -1,8 +1,17 @@
-/* Rutta Bar Admin Console · Structured Workspace Controller */
+/* Rutta macOS Desktop App · Dual-Role Controller (Employee Personal App + Workspace Admin) */
 (() => {
   'use strict';
 
   let state = window.createInitialRuttaState();
+  // Support optional ?role=admin or ?role=employee deep link
+  try {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('role') === 'admin') {
+      state.roleMode = 'admin';
+      state.activeTab = 'voiceprints';
+    }
+  } catch (_) {}
+
   let audioCtx = null;
   let sampleTimer = null;
   let micStream = null;
@@ -26,7 +35,13 @@
     play: '<svg viewBox="0 0 12 12" fill="currentColor"><path d="M3 2.2l7 3.8-7 3.8V2.2z"/></svg>',
     pause: '<svg viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="2.2" width="2.4" height="7.6" rx="0.6"/><rect x="7.1" y="2.2" width="2.4" height="7.6" rx="0.6"/></svg>',
     lock: '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.3" width="8" height="5.5" rx="1.4"/><path d="M4.8 6.3V4.6a2.2 2.2 0 014.4 0v1.7"/></svg>',
-    close: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>'
+    close: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+    wave: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M4 10v0M7 7v6M10 4.5v11M13 7v6M16 10v0"/></svg>',
+    check: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="13" height="13" rx="2.5"/><path d="M7 10.2l2 2 4-4.2"/></svg>',
+    bar: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.8" width="15" height="6.4" rx="2.4"/><circle cx="6.2" cy="10" r="0.95" fill="currentColor" stroke="none"/><path d="M10.8 10h3.2"/></svg>',
+    nodes: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="10" cy="14" r="2"/><path d="M7.6 7.4L9.2 12.2M12.4 7.4l-1.6 4.8M8 6h4"/></svg>',
+    arrowRight: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11.5 5.5L16 10l-4.5 4.5"/></svg>',
+    clock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.1 1.3"/></svg>'
   };
 
   function playSwitchClick(isMute) {
@@ -58,6 +73,14 @@
     return state.members.find((m) => m.id === id) || null;
   }
 
+  function currentEmployee() {
+    return memberById(state.currentEmployeeId) || state.members[0];
+  }
+
+  function canBeCapturedByPeer(member) {
+    return Boolean(member && member.active && member.allowPeerCapture && member.tempPauseMinutes === 0);
+  }
+
   function finishLabel(f) {
     return { silver: t('finishSilver'), sky: t('finishSky'), starlight: t('finishStarlight'), midnight: t('finishMidnight') }[f] || f;
   }
@@ -68,8 +91,40 @@
     return 'assets/switch-photo-ready.webp';
   }
 
-  function renderAvatar(member, small = false) {
-    const cls = small ? 'avatar avatar-sm' : 'avatar';
+  function finishHeroImage(finish) {
+    return {
+      silver: 'assets/hero-silver.webp',
+      sky: 'assets/hero-sky.webp',
+      starlight: 'assets/hero-starlight.webp',
+      midnight: 'assets/hero-midnight.webp'
+    }[finish] || 'assets/hero-silver.webp';
+  }
+
+  function renderMemberHardwareVisual(member, previewMode, switchId) {
+    if (member.finish === 'silver') {
+      return `
+        <div class="hw-render-wrap">
+          <img src="${hwImageForState(previewMode)}" alt="Silver Rutta Bar">
+          <span class="hw-led-overlay mode-${previewMode}" aria-hidden="true"></span>
+          <button type="button" class="hw-switch-area" id="${switchId}" aria-label="Physical mute switch"></button>
+        </div>
+      `;
+    }
+    const isMuted = previewMode === 'mute';
+    return `
+      <div class="hw-render-wrap is-finish-hero ${isMuted ? 'is-muted' : ''}">
+        <img src="${finishHeroImage(member.finish)}" alt="${finishLabel(member.finish)} Rutta Bar">
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+        <button type="button" class="btn btn-secondary btn-xs" id="${switchId}">
+          ${isMuted ? (state.lang === 'zh' ? '恢复物理开关' : 'Unmute switch') : (state.lang === 'zh' ? '拨动物理静音' : 'Engage physical mute')}
+        </button>
+      </div>
+    `;
+  }
+
+  function renderAvatar(member, size = 'md') {
+    const cls = size === 'xs' ? 'avatar avatar-xs' : size === 'sm' ? 'avatar avatar-sm' : 'avatar';
     if (!member) return `<span class="${cls}">?</span>`;
     if (member.avatar) return `<img class="${cls}" src="${member.avatar}" alt="${esc(member.name)}">`;
     return `<span class="${cls}">${esc(member.initials)}</span>`;
@@ -98,38 +153,169 @@
     }, actionLabel ? 4200 : 2400);
   }
 
-  /* ---------- Chrome & Topbar Sync ---------- */
+  function switchRole(role, targetTab = null) {
+    stopQuotePlayback();
+    closeMemberDrawer();
+    state.roleMode = role;
+    if (targetTab) {
+      state.activeTab = targetTab;
+    } else {
+      state.activeTab = role === 'employee' ? 'my-voice' : 'voiceprints';
+    }
+    state.decFilter = 'all';
+    renderAll();
+  }
+
+  function employeeDecisions(empId) {
+    return state.decisions.filter((d) => d.participants.some((p) => p.memberId === empId));
+  }
+
+  function adminDecisions() {
+    // Admins ONLY see confirmed/synced workspace records & Monday team follow-ups — NEVER private unconfirmed drafts
+    return state.decisions.filter((d) => d.status !== 'pending');
+  }
+
+  /* ---------- Chrome, Role Switcher, Sidebar & Menu Bar Sync ---------- */
   function syncChrome() {
     document.documentElement.lang = state.lang === 'zh' ? 'zh-CN' : 'en';
     $('#macos-menubar').hidden = !state.showMenubar;
+    $('#toggle-menubar').checked = state.showMenubar;
     document.body.classList.toggle('has-menubar', state.showMenubar);
     document.body.classList.toggle('clean-shot', state.cleanShot);
 
     $$('[data-i18n]').forEach((el) => { el.textContent = t(el.getAttribute('data-i18n')); });
     $$('.lang-btn').forEach((b) => b.classList.toggle('is-active', b.dataset.lang === state.lang));
+    $$('.role-btn').forEach((b) => b.classList.toggle('is-active', b.dataset.role === state.roleMode));
 
-    $$('.rail-item').forEach((item) => {
-      const on = item.dataset.tab === state.activeTab;
-      item.classList.toggle('is-active', on);
-      item.setAttribute('aria-selected', String(on));
+    const emp = currentEmployee();
+
+    // Render Role Identity sub-block in Sidebar
+    const idBox = $('#role-identity');
+    if (state.roleMode === 'employee') {
+      const maya = memberById('maya');
+      const leo = memberById('leo');
+      idBox.innerHTML = `
+        <div class="emp-switcher">
+          <button type="button" class="emp-pill ${state.currentEmployeeId === 'maya' ? 'is-active' : ''}" data-pick-emp="maya">
+            ${renderAvatar(maya, 'xs')}
+            <span>Maya</span>
+            <span class="emp-pill-tag">A</span>
+          </button>
+          <button type="button" class="emp-pill ${state.currentEmployeeId === 'leo' ? 'is-active' : ''}" data-pick-emp="leo">
+            ${renderAvatar(leo, 'xs')}
+            <span>Leo</span>
+            <span class="emp-pill-tag">B</span>
+          </button>
+        </div>
+      `;
+      $$('[data-pick-emp]', idBox).forEach((b) => {
+        b.addEventListener('click', () => {
+          stopQuotePlayback();
+          state.currentEmployeeId = b.dataset.pickEmp;
+          renderAll();
+        });
+      });
+    } else {
+      idBox.innerHTML = `
+        <div class="admin-scope-pill">
+          ${ICONS.shield}
+          <span>${state.lang === 'zh' ? '管理者视角 · 无权听原声' : 'Admin scope · Zero raw audio'}</span>
+        </div>
+      `;
+    }
+
+    // Render Role-Specific Navigation
+    const navEl = $('#rail-nav');
+    if (state.roleMode === 'employee') {
+      const myPending = employeeDecisions(emp.id).filter((d) => d.status === 'pending').length;
+      navEl.innerHTML = `
+        <div class="rail-group-label">${t('groupMySpace')} · ${esc(emp.name.split(' ')[0])}</div>
+        <button type="button" class="rail-item ${state.activeTab === 'my-voice' ? 'is-active' : ''}" data-tab="my-voice" role="tab">
+          ${ICONS.wave}
+          <span>${t('navMyVoice')}</span>
+          <span class="rail-count">${canBeCapturedByPeer(emp) ? (state.lang === 'zh' ? '可被录' : 'Open') : (state.lang === 'zh' ? '仅本机' : 'Self')}</span>
+        </button>
+        <button type="button" class="rail-item ${state.activeTab === 'my-decisions' ? 'is-active' : ''}" data-tab="my-decisions" role="tab">
+          ${ICONS.check}
+          <span>${t('navMyDecisions')}</span>
+          ${myPending > 0 ? `<span class="rail-count is-accent" id="nav-count-pending">${myPending}</span>` : ''}
+        </button>
+        <button type="button" class="rail-item ${state.activeTab === 'my-agent' ? 'is-active' : ''}" data-tab="my-agent" role="tab">
+          ${ICONS.nodes}
+          <span>${t('navMyAgent')}</span>
+        </button>
+      `;
+    } else {
+      const syncedCount = adminDecisions().length;
+      navEl.innerHTML = `
+        <div class="rail-group-label">${t('groupAdminCore')}</div>
+        <button type="button" class="rail-item ${state.activeTab === 'voiceprints' ? 'is-active' : ''}" data-tab="voiceprints" role="tab">
+          ${ICONS.wave}
+          <span>${t('navVoiceprints')}</span>
+          <span class="rail-count" id="nav-count-vp">${state.members.length}</span>
+        </button>
+        <button type="button" class="rail-item ${state.activeTab === 'decisions' ? 'is-active' : ''}" data-tab="decisions" role="tab">
+          ${ICONS.check}
+          <span>${t('navAdminDecisions')}</span>
+          <span class="rail-count" id="nav-count-admin-dec">${syncedCount}</span>
+        </button>
+
+        <div class="rail-group-label">${t('groupAdminSystem')}</div>
+        <button type="button" class="rail-item ${state.activeTab === 'devices' ? 'is-active' : ''}" data-tab="devices" role="tab">
+          ${ICONS.bar}
+          <span>${t('navDevices')}</span>
+          <span class="rail-count">4</span>
+        </button>
+        <button type="button" class="rail-item ${state.activeTab === 'integrations' ? 'is-active' : ''}" data-tab="integrations" role="tab">
+          ${ICONS.nodes}
+          <span>${t('navIntegrations')}</span>
+        </button>
+      `;
+    }
+
+    $$('.rail-item', navEl).forEach((b) => {
+      b.addEventListener('click', () => {
+        stopQuotePlayback();
+        closeMemberDrawer();
+        state.activeTab = b.dataset.tab;
+        renderAll();
+      });
     });
 
+    // Topbar Title & Contextual Action
     const headerMap = {
+      'my-voice': [t('titleMyVoice'), t('subMyVoice')],
+      'my-decisions': [t('titleMyDecisions'), t('subMyDecisions')],
+      'my-agent': [t('titleMyAgent'), t('subMyAgent')],
       voiceprints: [t('titleVoiceprints'), t('subVoiceprints')],
-      decisions: [t('titleDecisions'), t('subDecisions')],
+      decisions: [t('titleAdminDecisions'), t('subAdminDecisions')],
       devices: [t('titleDevices'), t('subDevices')],
       integrations: [t('titleIntegrations'), t('subIntegrations')]
     };
-    const [hTitle, hSub] = headerMap[state.activeTab];
+    const [hTitle, hSub] = headerMap[state.activeTab] || ['', ''];
     $('#topbar-title').textContent = hTitle;
     $('#topbar-subtitle').textContent = hSub;
 
-    // Context-aware topbar action
     const actionsEl = $('#topbar-actions');
-    if (state.activeTab === 'voiceprints') {
+    if (state.roleMode === 'employee' && state.activeTab === 'my-voice') {
+      const paused = emp.tempPauseMinutes > 0;
+      actionsEl.innerHTML = `
+        <button type="button" class="btn ${paused ? 'btn-amber-soft' : 'btn-secondary'}" id="top-temp-pause">
+          ${ICONS.clock}
+          <span>${paused ? t('empQuickPauseActive') : t('empQuickPause')}</span>
+        </button>
+      `;
+      $('#top-temp-pause', actionsEl).addEventListener('click', () => {
+        emp.tempPauseMinutes = emp.tempPauseMinutes > 0 ? 0 : 30;
+        showToast(emp.tempPauseMinutes > 0
+          ? (state.lang === 'zh' ? `已开启 30 分钟免被同事收录（不影响本机）` : `Paused peer capture for 30m`)
+          : (state.lang === 'zh' ? `已恢复跨设备收录设置` : `Resumed peer capture setting`));
+        renderAll();
+      });
+    } else if (state.roleMode === 'admin' && state.activeTab === 'voiceprints') {
       actionsEl.innerHTML = `<button type="button" class="btn btn-primary" id="top-add-member">${ICONS.plus}<span>${t('btnAddMember')}</span></button>`;
       $('#top-add-member', actionsEl).addEventListener('click', () => openEnrollModal(null));
-    } else if (state.activeTab === 'devices') {
+    } else if (state.roleMode === 'admin' && state.activeTab === 'devices') {
       actionsEl.innerHTML = `<button type="button" class="btn ${state.multiBarSync ? 'btn-primary' : 'btn-secondary'}" id="top-sync-btn">${state.multiBarSync ? t('syncBtnStop') : t('syncBtnStart')}</button>`;
       $('#top-sync-btn', actionsEl).addEventListener('click', () => {
         state.multiBarSync = !state.multiBarSync;
@@ -140,29 +326,45 @@
       actionsEl.innerHTML = '';
     }
 
-    const activeCount = state.members.filter((m) => m.active).length;
-    const pendingCount = state.decisions.filter((d) => d.status === 'pending').length;
-    $('#nav-count-vp').textContent = String(state.members.length);
-    const pBadge = $('#nav-count-pending');
-    pBadge.textContent = String(pendingCount);
-    pBadge.hidden = pendingCount === 0;
+    // Sidebar Bottom Hardware Card & macOS Menu Bar Sync
+    const localBarMode = state.roleMode === 'employee'
+      ? (emp.barState === 'muted' ? 'mute' : state.hwState)
+      : state.hwState;
 
-    // Hardware status dot in rail & optional menubar
     const stateLabels = {
-      ready: state.lang === 'zh' ? '待机中' : 'Ready',
-      input: state.lang === 'zh' ? '识别中' : 'Capturing',
-      visitor: state.lang === 'zh' ? '访客已忽略' : 'Visitor ignored',
+      ready: state.lang === 'zh' ? '待机绿灯' : 'Ready',
+      input: state.lang === 'zh' ? '识别拾音中' : 'Capturing',
+      visitor: state.lang === 'zh' ? '已忽略未授权' : 'Ignored',
       mute: state.lang === 'zh' ? '物理静音' : 'Muted'
     };
-    $('#sidebar-led-dot').className = `dot dot-${state.hwState}`;
-    $('#sidebar-hw-label').textContent = state.hwState === 'mute'
-      ? (state.lang === 'zh' ? '本机 Bar 已静音' : 'Local Bar muted')
-      : (state.lang === 'zh' ? `${activeCount} 位声纹 · 4 台 Bar` : `${activeCount} active · 4 Bars`);
 
-    $('#mb-status-dot').className = `dot dot-${state.hwState}`;
-    $('#mb-status-label').textContent = stateLabels[state.hwState];
-    $('#mbp-pill').textContent = stateLabels[state.hwState];
-    $('#mbp-bar-img').src = hwImageForState(state.hwState);
+    $('#sidebar-led-dot').className = `dot dot-${localBarMode}`;
+    if (state.roleMode === 'employee') {
+      $('#sidebar-hw-label').textContent = `${emp.name.split(' ')[0]} · ${finishLabel(emp.finish)} Bar`;
+      $('#sidebar-hw-sub').textContent = emp.tempPauseMinutes > 0
+        ? (state.lang === 'zh' ? '30 分钟免被同事收录中' : 'Peer capture paused 30m')
+        : `${stateLabels[localBarMode]} · ${canBeCapturedByPeer(emp) ? (state.lang === 'zh' ? '允许他人收录' : 'Peers allowed') : (state.lang === 'zh' ? '仅本机收录' : 'Self only')}`;
+    } else {
+      const activeCount = state.members.filter((m) => m.active).length;
+      $('#sidebar-hw-label').textContent = state.lang === 'zh' ? `${activeCount} 位声纹 · 4 台 Bar` : `${activeCount} active · 4 Bars`;
+      $('#sidebar-hw-sub').textContent = stateLabels[localBarMode];
+    }
+
+    // Top macOS Menu Bar
+    $('#mb-status-dot').className = `dot dot-${localBarMode}`;
+    $('#mb-status-label').textContent = emp.tempPauseMinutes > 0
+      ? (state.lang === 'zh' ? '免收录 30m' : 'Paused 30m')
+      : stateLabels[localBarMode];
+    $('#mbp-title').textContent = `Rutta Bar · ${finishLabel(emp.finish)}`;
+    $('#mbp-sub').textContent = state.lang === 'zh'
+      ? `${emp.name} 的 MacBook Air · USB-C`
+      : `${emp.name}’s MacBook Air · USB-C`;
+    $('#mbp-pill').textContent = stateLabels[localBarMode];
+    $('#mbp-pill').className = `badge ${localBarMode === 'mute' ? 'badge-orange' : localBarMode === 'input' ? 'badge-amber' : localBarMode === 'visitor' ? 'badge-neutral' : 'badge-green'}`;
+    $('#mbp-bar-img').src = emp.finish === 'silver' ? hwImageForState(localBarMode) : finishHeroImage(emp.finish);
+    $('#mbp-bar-img').style.maxHeight = emp.finish === 'silver' ? '' : '54px';
+    $('#mbp-bar-img').style.objectFit = 'contain';
+    $('#mbp-toggle-peer').setAttribute('aria-checked', String(emp.allowPeerCapture));
   }
 
   function setHardwareState(mode) {
@@ -171,15 +373,16 @@
     state.hwState = mode;
     if (mode === 'visitor') state.blockedVisitorsToday += 1;
     syncChrome();
-    if (state.activeTab === 'devices') renderCurrentView();
+    if (state.activeTab === 'devices' || state.activeTab === 'my-voice') renderCurrentView();
     if (state.inspectedMemberId) renderMemberDrawer(state.inspectedMemberId);
   }
 
-  /* ---------- Floating Notification Card ---------- */
+  /* ---------- Floating macOS Notification Card ---------- */
   function showDecisionNotice(decisionId) {
     const dec = state.decisions.find((d) => d.id === decisionId) || state.decisions[0];
     if (!dec) return;
     const owner = memberById(dec.ownerId);
+    const capturer = memberById(dec.capturedById);
     const allDone = dec.participants.every((p) => p.confirmed);
     const names = dec.participants.map((p) => memberById(p.memberId)?.name.split(' ')[0] || '').join(' & ');
 
@@ -187,15 +390,16 @@
     fc.hidden = false;
     fc.innerHTML = `
       <div class="fn-head">
-        <span class="fn-brand"><img src="assets/monogram.svg" alt="" width="11" height="14"><span>${t('fnDecision')}</span></span>
+        <span class="fn-brand"><img src="assets/monogram.svg" alt="" width="10" height="13"><span>${t('fnDecision')}</span></span>
         <button type="button" class="icon-btn" id="fc-close-btn" aria-label="Close">${ICONS.close}</button>
       </div>
       <div class="fn-title">${esc(pick(dec.title))}</div>
       <div class="fn-desc">
         ${owner ? esc(owner.name) : t('unassigned')} · ${esc(pick(dec.due))}<br>
+        ${capturer ? (state.lang === 'zh' ? `由 ${capturer.name.split(' ')[0]} 的 Rutta Bar 收录 · ` : `Via ${capturer.name.split(' ')[0]}’s Bar · `) : ''}
         ${allDone
-          ? (state.lang === 'zh' ? '已确认，并同步到 Linear / Notion / Slack。' : 'Confirmed and synced to Linear, Notion, and Slack.')
-          : (state.lang === 'zh' ? `目前仅 ${names} 可见，确认后同步至团队。` : `Private to ${names} until confirmed.`)}
+          ? (state.lang === 'zh' ? '已同步至 Linear / Notion / Slack。' : 'Synced to Linear, Notion & Slack.')
+          : (state.lang === 'zh' ? `仅 ${names} 可见，确认后同步。` : `Private to ${names} until confirmed.`)}
       </div>
       <div class="fn-foot">
         <div class="confirm-list">
@@ -204,7 +408,7 @@
             const first = m ? m.name.split(' ')[0] : '?';
             return `
               <button type="button" class="confirm-chip ${p.confirmed ? 'is-confirmed' : ''}" data-fc-confirm="${dec.id}:${p.memberId}">
-                ${renderAvatar(m, true)}
+                ${renderAvatar(m, 'sm')}
                 <span>${esc(first)} ${p.confirmed ? '✓' : t('confirmAction')}</span>
               </button>
             `;
@@ -216,7 +420,8 @@
     $('#fc-close-btn', fc).addEventListener('click', () => { fc.hidden = true; });
     $('#fc-open', fc).addEventListener('click', () => {
       fc.hidden = true;
-      state.activeTab = 'decisions';
+      state.roleMode = 'employee';
+      state.activeTab = 'my-decisions';
       state.selectedDecisionId = dec.id;
       renderAll();
     });
@@ -228,23 +433,472 @@
     });
   }
 
-  function showVisitorNotice() {
+  function showPrivacyNotice(isPeerBlock = false) {
     const fc = $('#floating-card');
     fc.hidden = false;
     fc.innerHTML = `
       <div class="fn-head">
-        <span class="fn-brand"><img src="assets/monogram.svg" alt="" width="11" height="14"><span>${t('fnVisitor')}</span></span>
+        <span class="fn-brand"><img src="assets/monogram.svg" alt="" width="10" height="13"><span>${t('fnVisitor')}</span></span>
         <button type="button" class="icon-btn" id="fc-close-btn" aria-label="Close">${ICONS.close}</button>
       </div>
-      <div class="fn-title">${t('fnVisitorTitle')}</div>
-      <div class="fn-desc">${t('fnVisitorDesc')}</div>
+      <div class="fn-title">${isPeerBlock ? t('fnPeerTitle') : t('fnVisitorTitle')}</div>
+      <div class="fn-desc">${isPeerBlock ? t('fnPeerDesc') : t('fnVisitorDesc')}</div>
     `;
     $('#fc-close-btn', fc).addEventListener('click', () => { fc.hidden = true; });
   }
 
-  /* ---------- VIEW 1: VOICEPRINTS TABLE ---------- */
-  function renderVoiceprintsView() {
-    const activeCount = state.members.filter((m) => m.active).length;
+  /* =====================================================================
+   * EMPLOYEE VIEWS (Personal macOS App Experience)
+   * ===================================================================== */
+  function renderEmployeeVoiceView() {
+    const emp = currentEmployee();
+    const maya = memberById('maya');
+    const leo = memberById('leo');
+    const otherId = emp.id === 'leo' ? 'maya' : 'leo';
+    const isMuted = emp.barState === 'muted';
+    const previewMode = isMuted ? 'mute' : 'ready';
+    const leoAllowedOnMaya = canBeCapturedByPeer(leo);
+
+    return `
+      ${emp.tempPauseMinutes > 0 ? `
+        <div class="temp-pause-banner">
+          <span>${state.lang === 'zh'
+            ? `临时私密模式生效中（剩余 ${emp.tempPauseMinutes} 分钟）：在此期间同事的 Rutta Bar 将完全忽略你的声音，不亮灯也不留存。`
+            : `Temporary privacy pause active (${emp.tempPauseMinutes}m left): teammates’ Bars will ignore your speech with zero storage.`}</span>
+          <button type="button" class="btn btn-secondary btn-xs" id="btn-end-pause">${state.lang === 'zh' ? '立即恢复' : 'Resume now'}</button>
+        </div>
+      ` : ''}
+
+      <section class="emp-top-grid">
+        <div class="panel emp-bar-card">
+          <div class="card-head-row">
+            <div>
+              <h2>${t('empBarCardTitle')} · ${finishLabel(emp.finish)}</h2>
+              <p>${t('empBarCardSub')}</p>
+            </div>
+            <span class="badge ${isMuted ? 'badge-orange' : 'badge-green'}">${isMuted ? t('diagMute') : t('diagReady')}</span>
+          </div>
+
+          <div class="hw-studio-box">
+            <div class="hw-studio-head">
+              <span style="display:inline-flex;align-items:center;gap:6px;">
+                <span class="dot ${isMuted ? 'dot-mute' : 'dot-ready'}"></span>
+                <span>${esc(emp.name)} · MacBook Air</span>
+              </span>
+              <span style="color:var(--muted);">${emp.lidStandby ? (state.lang === 'zh' ? '合盖待机已开' : 'Lid standby ON') : (state.lang === 'zh' ? '仅开盖在线' : 'Lid open only')}</span>
+            </div>
+            ${renderMemberHardwareVisual(emp, previewMode, 'emp-hw-switch')}
+          </div>
+
+          <div class="drawer-kv-list">
+            <div class="drawer-kv-row">
+              <span>${state.lang === 'zh' ? '物理静音挡位' : 'Physical mute switch'}</span>
+              <span>${isMuted ? (state.lang === 'zh' ? '已拨下 · 硬件断麦' : 'Engaged · Mic cut') : (state.lang === 'zh' ? '开启 · 正常待机' : 'Open · Ready')}</span>
+            </div>
+            <div class="drawer-kv-row">
+              <span>${state.lang === 'zh' ? '当前跨设备状态' : 'Peer-capture status'}</span>
+              <span>${canBeCapturedByPeer(emp) ? (state.lang === 'zh' ? '小会可被同事设备收录' : 'Teammates’ Bars allowed') : (state.lang === 'zh' ? '仅限我本机设备' : 'Own Bar only')}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel emp-consent-card">
+          <div class="card-head-row">
+            <div>
+              <h2>${t('empConsentTitle')}</h2>
+              <p>${t('empConsentSub')}</p>
+            </div>
+            <span class="badge badge-neutral">${ICONS.lock} ${state.lang === 'zh' ? '仅本人可改' : 'Self only'}</span>
+          </div>
+
+          <div class="consent-list">
+            <div class="consent-item">
+              <div>
+                <div class="ci-title">${t('consentMasterTitle')}</div>
+                <p class="ci-desc">${t('consentMasterDesc')}</p>
+              </div>
+              <button type="button" class="toggle" role="switch" aria-checked="${emp.active}" id="emp-toggle-master"></button>
+            </div>
+
+            <div class="consent-item is-featured">
+              <div>
+                <div class="ci-title">
+                  <span>${t('consentPeerTitle')}</span>
+                  <span class="badge ${canBeCapturedByPeer(emp) ? 'badge-green' : 'badge-neutral'}">${canBeCapturedByPeer(emp) ? t('peerAllowed') : t('peerSelfOnly')}</span>
+                </div>
+                <p class="ci-desc">${t('consentPeerDesc')}</p>
+              </div>
+              <button type="button" class="toggle" role="switch" aria-checked="${emp.allowPeerCapture}" ${emp.active ? '' : 'disabled'} id="emp-toggle-peer"></button>
+            </div>
+
+            <div class="consent-item">
+              <div>
+                <div class="ci-title">${t('consentConfirmTitle')}</div>
+                <p class="ci-desc">${t('consentConfirmDesc')}</p>
+              </div>
+              <button type="button" class="toggle" role="switch" aria-checked="${emp.requireMyConfirm}" id="emp-toggle-confirm"></button>
+            </div>
+
+            <div class="consent-item">
+              <div>
+                <div class="ci-title">${t('consentLidTitle')}</div>
+                <p class="ci-desc">${t('consentLidDesc')}</p>
+              </div>
+              <button type="button" class="toggle" role="switch" aria-checked="${emp.lidStandby}" id="emp-toggle-lid"></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Live A & B Small-Meeting Peer Capture Check -->
+      <section class="panel huddle-panel">
+        <div class="card-head-row">
+          <div>
+            <h2>${t('huddleTitle')}</h2>
+            <p>${t('huddleSub')}</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button type="button" class="btn btn-secondary btn-xs" id="btn-test-huddle-pop">
+              ${state.lang === 'zh' ? '模拟开小会效果' : 'Simulate huddle'}
+            </button>
+            <button type="button" class="btn btn-ghost btn-xs" id="btn-switch-ab">
+              ${t('huddleSwitchPerson')} (${otherId === 'maya' ? 'Maya A' : 'Leo B'}) →
+            </button>
+          </div>
+        </div>
+
+        <div class="huddle-flow">
+          <div class="huddle-node">
+            <div class="hn-head">
+              <div class="user-cell">
+                ${renderAvatar(maya, 'sm')}
+                <div>
+                  <div class="u-name" style="font-size:13px;">Maya Lin (A)</div>
+                  <div class="u-meta" style="font-size:11.5px;">${state.lang === 'zh' ? '持有银色 Rutta Bar' : 'Silver Rutta Bar on desk'}</div>
+                </div>
+              </div>
+              <span class="badge ${leoAllowedOnMaya ? 'badge-amber' : 'badge-green'}">
+                <span class="dot ${leoAllowedOnMaya ? 'dot-input' : 'dot-ready'}"></span>
+                ${leoAllowedOnMaya ? (state.lang === 'zh' ? '收录 A & B' : 'Captures A & B') : (state.lang === 'zh' ? '仅收录 A' : 'A only')}
+              </span>
+            </div>
+            <div class="hn-result">
+              ${leoAllowedOnMaya
+                ? (state.lang === 'zh' ? 'Maya 的 Rutta Bar 识别到 Leo 已开启跨设备收录，黄灯常亮并合并整理双方发言。' : 'Maya’s Bar recognizes Leo’s opted-in voiceprint, lights amber, and drafts a shared note.')
+                : (state.lang === 'zh' ? 'Maya 的 Rutta Bar 仅识别 Maya 本人发言；遇到 Leo 发言时立即跳过。' : 'Maya’s Bar captures Maya only and skips Leo’s voice completely.')}
+            </div>
+          </div>
+
+          <div class="huddle-arrow" aria-hidden="true">
+            ${ICONS.arrowRight}
+            <span>${leoAllowedOnMaya ? (state.lang === 'zh' ? '已授权' : 'Allowed') : (state.lang === 'zh' ? '已拒收' : 'Blocked')}</span>
+          </div>
+
+          <div class="huddle-node ${leoAllowedOnMaya ? 'is-allowed' : 'is-blocked'}">
+            <div class="hn-head">
+              <div class="user-cell">
+                ${renderAvatar(leo, 'sm')}
+                <div>
+                  <div class="u-name" style="font-size:13px;">Leo Park (B)</div>
+                  <div class="u-meta" style="font-size:11.5px;">${leo.tempPauseMinutes > 0 ? (state.lang === 'zh' ? '临时免收录 30 分钟中' : 'Paused 30m') : (leo.allowPeerCapture ? (state.lang === 'zh' ? '允许被同事设备收录' : 'Peer capture ON') : (state.lang === 'zh' ? '已关闭“允许被同事设备收录”' : 'Peer capture OFF'))}</div>
+                </div>
+              </div>
+              <span class="badge ${leoAllowedOnMaya ? 'badge-green' : 'badge-neutral'}">
+                ${leoAllowedOnMaya ? (state.lang === 'zh' ? '同步推送给 B 确认' : 'Sent to B to confirm') : (state.lang === 'zh' ? '不亮灯 · 0 留存' : 'LED dark · 0 saved')}
+              </span>
+            </div>
+            <div class="hn-result">
+              ${leoAllowedOnMaya
+                ? (state.lang === 'zh' ? '<strong>知情与确认权：</strong>生成的记录会立即推送到 Leo 的 Rutta App（标明「由 Maya 的设备收录」），Leo 可点确认或单方面销毁原话。' : '<strong>Full transparency:</strong> Leo immediately receives the draft labeled "Captured via Maya’s Bar" and can confirm or destroy it.')
+                : (state.lang === 'zh' ? '<strong>零留存保护：</strong>即便 Leo 在团队白名单中，Maya 的设备遇到 Leo 声音时也会视同访客实时丢弃，不亮灯、不转写、不生成记录。' : '<strong>Zero storage:</strong> Even though Leo is in the team roster, Maya’s Bar drops his speech like a visitor—LED dark, zero transcript.')}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Bottom Personal Voiceprint Management Strip -->
+      <section class="panel vp-self-strip">
+        <div class="vss-left">
+          <div class="vp-cell">
+            <div class="mini-wave">${emp.bars.map((h) => `<span style="height:${Math.round(h * 0.19)}px"></span>`).join('')}</div>
+            <span class="badge ${emp.active ? 'badge-green' : 'badge-neutral'}">${emp.active ? t('statusActive') : t('statusPaused')}</span>
+          </div>
+          <span style="font-size:12.5px;color:var(--muted);">
+            ${t('colLastHeard')}：${esc(pick(emp.lastHeard))} · ${state.lang === 'zh' ? '原声仅限本人在场回放，确认后 7 天自动销毁' : 'Clips accessible to participants only, auto-deleted after 7d'}
+          </span>
+        </div>
+        <div class="vss-actions">
+          <button type="button" class="btn btn-secondary btn-xs" id="emp-verify-vp">${t('drawerVerifyBtn')}</button>
+          <button type="button" class="btn btn-secondary btn-xs" id="emp-reenroll-vp">${t('drawerReenroll')}</button>
+        </div>
+      </section>
+    `;
+  }
+
+  function bindEmployeeVoiceEvents(root) {
+    const emp = currentEmployee();
+    $('#btn-end-pause', root)?.addEventListener('click', () => {
+      emp.tempPauseMinutes = 0;
+      renderAll();
+    });
+    $('#emp-hw-switch', root)?.addEventListener('click', () => {
+      emp.barState = emp.barState === 'muted' ? 'online' : 'muted';
+      playSwitchClick(emp.barState === 'muted');
+      if (emp.id === 'maya') state.hwState = emp.barState === 'muted' ? 'mute' : 'ready';
+      renderAll();
+    });
+    $('#emp-toggle-master', root)?.addEventListener('click', () => {
+      emp.active = !emp.active;
+      showToast(emp.active
+        ? (state.lang === 'zh' ? '已启用你的团队声纹识别' : 'Voiceprint recognition enabled')
+        : (state.lang === 'zh' ? '已暂停声纹：所有设备均不再识别你' : 'Voiceprint paused across all Bars'));
+      renderAll();
+    });
+    $('#emp-toggle-peer', root)?.addEventListener('click', () => {
+      if (!emp.active) return;
+      emp.allowPeerCapture = !emp.allowPeerCapture;
+      showToast(emp.allowPeerCapture
+        ? (state.lang === 'zh' ? '已开启：开小会时允许同事设备收录并推送给你确认' : 'Peer capture enabled — drafts will be sent to you')
+        : (state.lang === 'zh' ? '已关闭：同事设备遇到你的声音将不亮灯、不留存' : 'Peer capture disabled — teammates’ Bars will ignore you'));
+      renderAll();
+    });
+    $('#emp-toggle-confirm', root)?.addEventListener('click', () => {
+      emp.requireMyConfirm = !emp.requireMyConfirm;
+      renderAll();
+    });
+    $('#emp-toggle-lid', root)?.addEventListener('click', () => {
+      emp.lidStandby = !emp.lidStandby;
+      renderAll();
+    });
+    $('#btn-switch-ab', root)?.addEventListener('click', () => {
+      state.currentEmployeeId = emp.id === 'leo' ? 'maya' : 'leo';
+      renderAll();
+    });
+    $('#btn-test-huddle-pop', root)?.addEventListener('click', () => {
+      const leo = memberById('leo');
+      if (canBeCapturedByPeer(leo)) {
+        showDecisionNotice('dec-launch');
+      } else {
+        state.blockedVisitorsToday += 1;
+        showPrivacyNotice(true);
+      }
+    });
+    $('#emp-verify-vp', root)?.addEventListener('click', () => {
+      emp.lastHeard = { zh: '刚刚验证通过', en: 'Verified just now' };
+      showToast(state.lang === 'zh' ? `声纹识别正常 · 已匹配 ${emp.name}` : `Voiceprint matched ${emp.name}`);
+      renderAll();
+    });
+    $('#emp-reenroll-vp', root)?.addEventListener('click', () => openEnrollModal(emp.id));
+  }
+
+  /* =====================================================================
+   * SHARED DECISIONS VIEW (Strict Employee vs Admin Privacy Boundary)
+   * ===================================================================== */
+  function renderDecisionsView(isAdmin) {
+    const emp = currentEmployee();
+    const baseList = isAdmin ? adminDecisions() : employeeDecisions(emp.id);
+    const pendingCount = baseList.filter((d) => d.status === 'pending').length;
+    const mondayCount = baseList.filter((d) => d.status === 'monday').length;
+    const list = baseList.filter((d) => state.decFilter === 'all' || d.status === state.decFilter);
+
+    let selected = list.find((d) => d.id === state.selectedDecisionId) || list[0] || null;
+    if (selected) state.selectedDecisionId = selected.id;
+
+    const statusBadge = (st) => {
+      if (st === 'synced') return `<span class="badge badge-green">${t('badgeSynced')}</span>`;
+      if (st === 'monday') return `<span class="badge badge-neutral">${t('badgeMonday')}</span>`;
+      return `<span class="badge badge-amber">${t('badgePending')}</span>`;
+    };
+
+    const hiddenDraftsCount = state.decisions.filter((d) => d.status === 'pending').length;
+
+    return `
+      ${isAdmin ? `
+        <div class="scope-banner">
+          <div class="scope-banner-left">
+            ${ICONS.lock}
+            <span>${state.lang === 'zh'
+              ? `管理者权限隔离生效中：当前有 ${hiddenDraftsCount} 条未确认私密讨论已自动隐藏，所有原始音频回放均不可访问。`
+              : `Admin privacy isolation active: ${hiddenDraftsCount} unconfirmed private drafts are hidden and all original voice clips are locked.`}</span>
+          </div>
+          <button type="button" class="btn btn-secondary btn-xs" id="btn-jump-emp-dec">
+            ${state.lang === 'zh' ? '切到员工端对比 →' : 'Compare Employee view →'}
+          </button>
+        </div>
+      ` : ''}
+
+      <section class="panel split-view">
+        <div class="split-list-col">
+          <div class="split-list-head">
+            <button type="button" class="pill-filter ${state.decFilter === 'all' ? 'is-active' : ''}" data-dec-filter="all">${t('decFilterAll')} (${baseList.length})</button>
+            ${!isAdmin ? `<button type="button" class="pill-filter ${state.decFilter === 'pending' ? 'is-active' : ''}" data-dec-filter="pending">${t('decFilterPending')} (${pendingCount})</button>` : ''}
+            <button type="button" class="pill-filter ${state.decFilter === 'synced' ? 'is-active' : ''}" data-dec-filter="synced">${t('decFilterSynced')}</button>
+            <button type="button" class="pill-filter ${state.decFilter === 'monday' ? 'is-active' : ''}" data-dec-filter="monday">${t('decFilterMonday')} (${mondayCount})</button>
+          </div>
+          <div class="split-items">
+            ${list.map((d) => {
+              const owner = memberById(d.ownerId);
+              const dotCls = d.status === 'synced' ? 'dot-ready' : d.status === 'pending' ? 'dot-input' : 'dot-paused';
+              return `
+                <button type="button" class="split-item ${selected && selected.id === d.id ? 'is-selected' : ''}" data-select-dec="${d.id}">
+                  <div class="si-top">
+                    <span class="si-meta"><span class="dot ${dotCls}"></span>${esc(pick(d.context))}</span>
+                    ${d.visitorIgnoredCount > 0 ? `<span class="badge badge-neutral">${state.lang === 'zh' ? '已过滤访客' : 'Visitor filtered'}</span>` : ''}
+                  </div>
+                  <div class="si-title">${esc(pick(d.title))}</div>
+                  <div class="si-meta">${owner ? esc(owner.name) : t('unassigned')} · ${esc(pick(d.due))}</div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="split-detail-col">
+          ${!selected
+            ? `<p style="color:var(--muted);padding:40px 0;text-align:center;">${state.lang === 'zh' ? '暂无记录' : 'No records in this view'}</p>`
+            : renderDecisionDetail(selected, statusBadge, isAdmin)
+          }
+        </div>
+      </section>
+    `;
+  }
+
+  function renderDecisionDetail(dec, statusBadge, isAdmin) {
+    const owner = memberById(dec.ownerId);
+    const capturer = memberById(dec.capturedById);
+    const isPlaying = playingQuoteId === dec.id;
+
+    return `
+      <div class="det-head">
+        <div>
+          <h2 class="det-title">${esc(pick(dec.title))}</h2>
+          <p class="det-summary">${esc(pick(dec.summary))}</p>
+        </div>
+        ${statusBadge(dec.status)}
+      </div>
+
+      <div class="kv-grid">
+        <div>
+          <div class="kv-k">${t('kvOwner')}</div>
+          <div class="kv-v">
+            ${dec.status === 'monday' && !owner
+              ? `<select class="select-clean" data-assign-owner="${dec.id}">
+                  <option value="">${t('assignPlaceholder')}</option>
+                  ${state.members.filter((m) => m.active).map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}
+                </select>`
+              : `${renderAvatar(owner, 'sm')}<span>${owner ? esc(owner.name) : t('unassigned')}</span>`
+            }
+          </div>
+        </div>
+        <div>
+          <div class="kv-k">${t('kvDue')}</div>
+          <div class="kv-v">${esc(pick(dec.due))}</div>
+        </div>
+        <div>
+          <div class="kv-k">${t('kvSource')}</div>
+          <div class="kv-v">
+            ${capturer
+              ? `<i class="sw sw-${capturer.finish}"></i><span>${state.lang === 'zh' ? `${capturer.name.split(' ')[0]} 的 Rutta Bar` : `${capturer.name.split(' ')[0]}’s Bar`}</span>`
+              : esc(pick(dec.context))}
+          </div>
+        </div>
+      </div>
+
+      ${dec.visitorIgnoredCount > 0 ? `
+        <div class="visitor-notice-bar">
+          ${ICONS.shield}
+          <span>${state.lang === 'zh'
+            ? `讨论期间检测到 ${dec.visitorIgnoredCount} 位未加入访客发言，状态灯未亮，音频已实时丢弃。`
+            : `${dec.visitorIgnoredCount} unenrolled visitor spoke during this session — LED stayed dark and audio was dropped.`}</span>
+        </div>
+      ` : ''}
+
+      <div class="confirm-section">
+        ${dec.status === 'synced'
+          ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);">
+              <span>${t('syncedToLabel')}:</span>
+              ${dec.syncedTools.map((st) => `<span class="badge badge-green">✓ ${esc(st)}</span>`).join('')}
+            </div>`
+          : `<div class="confirm-list">
+              <span style="font-size:12.5px;color:var(--muted);">${t('confirmPrompt')}</span>
+              ${dec.participants.map((p) => {
+                const m = memberById(p.memberId);
+                const first = m ? m.name.split(' ')[0] : '?';
+                return `
+                  <button type="button" class="confirm-chip ${p.confirmed ? 'is-confirmed' : ''}" data-confirm-part="${dec.id}:${p.memberId}">
+                    ${renderAvatar(m, 'sm')}
+                    <span>${esc(first)} · ${p.confirmed ? t('confirmedTag') : t('confirmAction')}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>`
+        }
+      </div>
+
+      ${isAdmin ? `
+        <div class="quote-box is-admin-locked">
+          <div class="qal-icon">${ICONS.lock}</div>
+          <div>
+            <div class="qal-title">${t('adminAudioLockedTitle')}</div>
+            <div class="qal-desc">${t('adminAudioLockedDesc')}</div>
+          </div>
+        </div>
+      ` : `
+        <div class="quote-box">
+          <div class="qb-top">
+            <span class="qb-title">${t('quoteTitle')} (${dec.quoteDuration})</span>
+            <span class="qb-lock">${ICONS.lock} ${t('quoteLock')}</span>
+          </div>
+          <div class="qb-player">
+            <button type="button" class="qb-play" data-play-quote="${dec.id}" aria-label="Play quote">
+              ${isPlaying ? ICONS.pause : ICONS.play}
+            </button>
+            <div class="qb-wave" id="qd-wave-${dec.id}">
+              ${Array.from({ length: 56 }, (_, i) => {
+                const h = 22 + ((i * 37 + 17) % 74);
+                const played = isPlaying && (i / 56) <= quotePlayPct;
+                return `<span class="${played ? 'is-played' : ''}" style="height:${h}%"></span>`;
+              }).join('')}
+            </div>
+            <span class="qb-time" id="qd-time-${dec.id}">${isPlaying ? formatClipTime(dec.quoteDuration, quotePlayPct) : `0:00 / ${dec.quoteDuration}`}</span>
+          </div>
+          <div class="qb-lines">
+            ${dec.quotes.map((q) => `
+              <div class="qb-line ${q.key ? 'is-key' : ''}">
+                <span class="qb-ts">${q.ts}</span>
+                <span class="qb-spk">${esc(q.speaker)}</span>
+                <span>${esc(pick(q))}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `}
+
+      <div class="det-actions">
+        ${!isAdmin
+          ? `<button type="button" class="btn btn-ghost btn-xs" style="color:var(--red);" data-delete-dec="${dec.id}">${t('btnDeleteRec')}</button>`
+          : `<span style="font-size:12px;color:var(--muted);">${state.lang === 'zh' ? '文字决定留存中 · 原声片段到期自动销毁' : 'Text decision archived · Source clip auto-expires'}</span>`
+        }
+        ${!isAdmin
+          ? `<button type="button" class="btn btn-primary btn-xs" data-handoff-dec="${dec.id}">${t('btnHandoffAgent')}</button>`
+          : ''
+        }
+      </div>
+    `;
+  }
+
+  function formatClipTime(totalStr, pct) {
+    const parts = totalStr.split(':').map(Number);
+    const sec = (parts[0] || 0) * 60 + (parts[1] || 12);
+    return `0:${String(Math.min(sec, Math.round(sec * pct))).padStart(2, '0')} / ${totalStr}`;
+  }
+
+  /* =====================================================================
+   * ADMIN VIEW 1: VOICEPRINTS TABLE
+   * ===================================================================== */
+  function renderAdminVoiceprintsView() {
+    const activeMembers = state.members.filter((m) => m.active);
+    const peerAllowedCount = activeMembers.filter((m) => canBeCapturedByPeer(m)).length;
     const q = state.vpSearch.trim().toLowerCase();
     const rows = state.members.filter((m) => {
       if (state.vpFilter === 'active' && !m.active) return false;
@@ -259,6 +913,13 @@
       return state.lang === 'zh' ? '在线' : 'Online';
     };
 
+    const peerBadge = (m) => {
+      if (!m.active) return `<span class="badge badge-neutral">${t('statusPaused')}</span>`;
+      if (m.tempPauseMinutes > 0) return `<span class="badge badge-amber">${t('peerTempPaused')}</span>`;
+      if (m.allowPeerCapture) return `<span class="badge badge-green">${t('peerAllowed')}</span>`;
+      return `<span class="badge badge-neutral">${ICONS.lock} ${t('peerSelfOnly')}</span>`;
+    };
+
     return `
       <section class="metrics-row">
         <div class="panel metric-card">
@@ -267,23 +928,21 @@
             <span class="badge badge-green"><span class="dot dot-ready"></span>${state.lang === 'zh' ? '白名单生效' : 'Active'}</span>
           </div>
           <div class="mc-value-row">
-            <span class="mc-value">${activeCount} <span style="font-size:15px;font-weight:500;color:var(--muted);">/ ${state.members.length}</span></span>
+            <span class="mc-value">${activeMembers.length} <span style="font-size:15px;font-weight:500;color:var(--muted);">/ ${state.members.length}</span></span>
           </div>
           <div class="mc-foot">${t('metricEnrolledFoot')}</div>
         </div>
 
         <div class="panel metric-card">
           <div class="mc-label">
-            <span>${t('metricDevices')}</span>
-            <span class="mc-mini-bars">
-              <i class="sw sw-silver"></i><i class="sw sw-midnight"></i><i class="sw sw-sky"></i><i class="sw sw-starlight"></i>
-            </span>
+            <span>${t('metricPeerAllowed')}</span>
+            <span class="badge badge-neutral">${ICONS.lock} ${state.lang === 'zh' ? '本人授权' : 'Self-owned'}</span>
           </div>
           <div class="mc-value-row">
-            <span class="mc-value">4 <span style="font-size:14px;font-weight:500;color:var(--muted);">${state.lang === 'zh' ? '台已绑定' : 'paired'}</span></span>
-            <button type="button" class="link-act" id="jump-devices">${t('btnViewDeviceCheck')}</button>
+            <span class="mc-value">${peerAllowedCount} <span style="font-size:15px;font-weight:500;color:var(--muted);">/ ${activeMembers.length}</span></span>
+            <button type="button" class="link-act" id="jump-emp-consent">${state.lang === 'zh' ? '去员工端体验 →' : 'Employee view →'}</button>
           </div>
-          <div class="mc-foot">${t('metricDevicesFoot')}</div>
+          <div class="mc-foot">${t('metricPeerFoot')}</div>
         </div>
 
         <div class="panel metric-card">
@@ -316,6 +975,7 @@
             <tr>
               <th>${t('colMember')}</th>
               <th>${t('colVoiceprint')}</th>
+              <th>${t('colPeerConsent')}</th>
               <th>${t('colDevice')}</th>
               <th>${t('colLastHeard')}</th>
               <th>${t('colEnabled')}</th>
@@ -324,7 +984,7 @@
           </thead>
           <tbody>
             ${rows.length === 0
-              ? `<tr><td colspan="6" style="text-align:center;padding:36px;color:var(--muted);">${t('emptyRoster')}</td></tr>`
+              ? `<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--muted);">${t('emptyRoster')}</td></tr>`
               : rows.map((m) => `
                 <tr class="${m.active ? '' : 'is-paused'}" data-open-member="${m.id}">
                   <td>
@@ -344,6 +1004,7 @@
                       <span class="badge ${m.active ? 'badge-green' : 'badge-neutral'}">${m.active ? t('statusActive') : t('statusPaused')}</span>
                     </div>
                   </td>
+                  <td>${peerBadge(m)}</td>
                   <td>
                     <span class="bar-cell">
                       <i class="sw sw-${m.finish}"></i>
@@ -369,13 +1030,13 @@
     `;
   }
 
-  /* ---------- Right-Side Member Inspector Drawer ---------- */
+  /* ---------- Admin Right-Side Inspector Drawer ---------- */
   function renderMemberDrawer(memberId) {
     const m = memberById(memberId);
     if (!m) { closeMemberDrawer(); return; }
     state.inspectedMemberId = memberId;
     const isMuted = m.barState === 'muted';
-    const previewMode = isMuted ? 'mute' : (state.hwState === 'input' ? 'input' : 'ready');
+    const previewMode = isMuted ? 'mute' : 'ready';
 
     const drawer = $('#member-drawer');
     drawer.innerHTML = `
@@ -402,15 +1063,22 @@
         </div>
 
         <div>
-          <div class="kv-k">${t('drawerDeviceLabel')} · ${finishLabel(m.finish)} Rutta Bar</div>
-          <div class="hw-studio-box" style="margin-top:6px;padding:16px 18px;">
-            <div class="hw-render-wrap">
-              <img src="${hwImageForState(previewMode)}" alt="Rutta Bar">
-              <span class="hw-led-overlay mode-${previewMode}" aria-hidden="true"></span>
-              <button type="button" class="hw-switch-area" id="drawer-hw-switch" aria-label="Mute switch"></button>
+          <div class="kv-k">${t('drawerPeerLabel')}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);margin-top:6px;">
+            <div>
+              <div style="font-size:13px;font-weight:580;">${canBeCapturedByPeer(m) ? t('peerAllowed') : t('peerSelfOnly')}</div>
+              <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">${state.lang === 'zh' ? '管理者仅可查看，不可代员工开启' : 'Read-only for admins'}</div>
             </div>
+            <button type="button" class="toggle" role="switch" aria-checked="${m.allowPeerCapture}" disabled aria-label="Employee controlled"></button>
+          </div>
+        </div>
+
+        <div>
+          <div class="kv-k">${t('drawerDeviceLabel')} · ${finishLabel(m.finish)} Rutta Bar</div>
+          <div class="hw-studio-box" style="margin-top:6px;padding:15px 18px;">
+            ${renderMemberHardwareVisual(m, previewMode, 'drawer-hw-switch')}
             <div style="margin-top:10px;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
-              <span>${t('drawerMuteHint')}</span>
+              <span>${m.finish === 'silver' ? t('drawerMuteHint') : (state.lang === 'zh' ? '机械静音滑键硬件断麦' : 'Hardware mic disconnect')}</span>
               <span>${isMuted ? t('diagMute') : t('diagReady')}</span>
             </div>
           </div>
@@ -429,10 +1097,6 @@
           <div class="drawer-kv-row">
             <span>${state.lang === 'zh' ? '原始音频访问' : 'Raw audio access'}</span>
             <span>${state.lang === 'zh' ? '仅本人与在场成员' : 'Participants only'}</span>
-          </div>
-          <div class="drawer-kv-row">
-            <span>${state.lang === 'zh' ? '退出机制' : 'Opt-out control'}</span>
-            <span>${state.lang === 'zh' ? '随时暂停或彻底移除' : 'Pause or delete anytime'}</span>
           </div>
         </div>
       </div>
@@ -459,7 +1123,7 @@
     });
     $('#drawer-verify-btn', drawer).addEventListener('click', () => {
       if (!m.active) {
-        showToast(state.lang === 'zh' ? `${m.name} 声纹当前已暂停，发言将被忽略` : `${m.name}'s voiceprint is paused — speech ignored`);
+        showToast(state.lang === 'zh' ? `${m.name} 声纹当前已暂停，发言将被忽略` : `${m.name}’s voiceprint is paused`);
       } else {
         m.lastHeard = { zh: '刚刚验证通过', en: 'Verified just now' };
         showToast(state.lang === 'zh' ? `声纹识别正常 · 已匹配 ${m.name}` : `Voiceprint matched ${m.name}`);
@@ -482,169 +1146,10 @@
     $('#member-drawer-backdrop').hidden = true;
   }
 
-  /* ---------- VIEW 2: DECISIONS MASTER-DETAIL SPLIT VIEW ---------- */
-  function renderDecisionsView() {
-    const pendingCount = state.decisions.filter((d) => d.status === 'pending').length;
-    const mondayCount = state.decisions.filter((d) => d.status === 'monday').length;
-    const list = state.decisions.filter((d) => state.decFilter === 'all' || d.status === state.decFilter);
-
-    let selected = list.find((d) => d.id === state.selectedDecisionId) || list[0] || null;
-    if (selected) state.selectedDecisionId = selected.id;
-
-    const statusBadge = (st) => {
-      if (st === 'synced') return `<span class="badge badge-green">${t('badgeSynced')}</span>`;
-      if (st === 'monday') return `<span class="badge badge-neutral">${t('badgeMonday')}</span>`;
-      return `<span class="badge badge-amber">${t('badgePending')}</span>`;
-    };
-
-    return `
-      <section class="panel split-view">
-        <div class="split-list-col">
-          <div class="split-list-head">
-            <button type="button" class="pill-filter ${state.decFilter === 'all' ? 'is-active' : ''}" data-dec-filter="all">${t('decFilterAll')} (${state.decisions.length})</button>
-            <button type="button" class="pill-filter ${state.decFilter === 'pending' ? 'is-active' : ''}" data-dec-filter="pending">${t('decFilterPending')} (${pendingCount})</button>
-            <button type="button" class="pill-filter ${state.decFilter === 'synced' ? 'is-active' : ''}" data-dec-filter="synced">${t('decFilterSynced')}</button>
-            <button type="button" class="pill-filter ${state.decFilter === 'monday' ? 'is-active' : ''}" data-dec-filter="monday">${t('decFilterMonday')} (${mondayCount})</button>
-          </div>
-          <div class="split-items">
-            ${list.map((d) => {
-              const owner = memberById(d.ownerId);
-              const dotCls = d.status === 'synced' ? 'dot-ready' : d.status === 'pending' ? 'dot-input' : 'dot-paused';
-              return `
-                <button type="button" class="split-item ${selected && selected.id === d.id ? 'is-selected' : ''}" data-select-dec="${d.id}">
-                  <div class="si-top">
-                    <span class="si-meta"><span class="dot ${dotCls}"></span>${esc(pick(d.context))}</span>
-                    ${d.visitorIgnoredCount > 0 ? `<span class="badge badge-neutral">${state.lang === 'zh' ? '已过滤访客' : 'Visitor filtered'}</span>` : ''}
-                  </div>
-                  <div class="si-title">${esc(pick(d.title))}</div>
-                  <div class="si-meta">${owner ? esc(owner.name) : t('unassigned')} · ${esc(pick(d.due))}</div>
-                </button>
-              `;
-            }).join('')}
-          </div>
-        </div>
-
-        <div class="split-detail-col">
-          ${!selected
-            ? `<p style="color:var(--muted);padding:40px 0;text-align:center;">${state.lang === 'zh' ? '暂无记录' : 'No records in this view'}</p>`
-            : renderDecisionDetail(selected, statusBadge)
-          }
-        </div>
-      </section>
-    `;
-  }
-
-  function renderDecisionDetail(dec, statusBadge) {
-    const owner = memberById(dec.ownerId);
-    const isPlaying = playingQuoteId === dec.id;
-
-    return `
-      <div class="det-head">
-        <div>
-          <h2 class="det-title">${esc(pick(dec.title))}</h2>
-          <p class="det-summary">${esc(pick(dec.summary))}</p>
-        </div>
-        ${statusBadge(dec.status)}
-      </div>
-
-      <div class="kv-grid">
-        <div>
-          <div class="kv-k">${t('kvOwner')}</div>
-          <div class="kv-v">
-            ${dec.status === 'monday' && !owner
-              ? `<select class="select-clean" data-assign-owner="${dec.id}">
-                  <option value="">${t('assignPlaceholder')}</option>
-                  ${state.members.filter((m) => m.active).map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}
-                </select>`
-              : `${renderAvatar(owner, true)}<span>${owner ? esc(owner.name) : t('unassigned')}</span>`
-            }
-          </div>
-        </div>
-        <div>
-          <div class="kv-k">${t('kvDue')}</div>
-          <div class="kv-v">${esc(pick(dec.due))}</div>
-        </div>
-        <div>
-          <div class="kv-k">${t('kvContext')}</div>
-          <div class="kv-v">${esc(pick(dec.context))}</div>
-        </div>
-      </div>
-
-      ${dec.visitorIgnoredCount > 0 ? `
-        <div class="visitor-notice-bar">
-          ${ICONS.shield}
-          <span>${state.lang === 'zh'
-            ? `讨论期间检测到 ${dec.visitorIgnoredCount} 位未加入访客发言，状态灯未亮，音频已实时丢弃。`
-            : `${dec.visitorIgnoredCount} unenrolled visitor spoke during this session — LED stayed dark and audio was dropped.`}</span>
-        </div>
-      ` : ''}
-
-      <div class="confirm-section">
-        ${dec.status === 'synced'
-          ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);">
-              <span>${t('syncedToLabel')}:</span>
-              ${dec.syncedTools.map((st) => `<span class="badge badge-green">✓ ${esc(st)}</span>`).join('')}
-            </div>`
-          : `<div class="confirm-list">
-              <span style="font-size:12.5px;color:var(--muted);">${t('confirmPrompt')}</span>
-              ${dec.participants.map((p) => {
-                const m = memberById(p.memberId);
-                const first = m ? m.name.split(' ')[0] : '?';
-                return `
-                  <button type="button" class="confirm-chip ${p.confirmed ? 'is-confirmed' : ''}" data-confirm-part="${dec.id}:${p.memberId}">
-                    ${renderAvatar(m, true)}
-                    <span>${esc(first)} · ${p.confirmed ? t('confirmedTag') : t('confirmAction')}</span>
-                  </button>
-                `;
-              }).join('')}
-            </div>`
-        }
-      </div>
-
-      <div class="quote-box">
-        <div class="qb-top">
-          <span class="qb-title">${t('quoteTitle')} (${dec.quoteDuration})</span>
-          <span class="qb-lock">${ICONS.lock} ${t('quoteLock')}</span>
-        </div>
-        <div class="qb-player">
-          <button type="button" class="qb-play" data-play-quote="${dec.id}" aria-label="Play quote">
-            ${isPlaying ? ICONS.pause : ICONS.play}
-          </button>
-          <div class="qb-wave" id="qd-wave-${dec.id}">
-            ${Array.from({ length: 56 }, (_, i) => {
-              const h = 22 + ((i * 37 + 17) % 74);
-              const played = isPlaying && (i / 56) <= quotePlayPct;
-              return `<span class="${played ? 'is-played' : ''}" style="height:${h}%"></span>`;
-            }).join('')}
-          </div>
-          <span class="qb-time" id="qd-time-${dec.id}">${isPlaying ? formatClipTime(dec.quoteDuration, quotePlayPct) : `0:00 / ${dec.quoteDuration}`}</span>
-        </div>
-        <div class="qb-lines">
-          ${dec.quotes.map((q) => `
-            <div class="qb-line ${q.key ? 'is-key' : ''}">
-              <span class="qb-ts">${q.ts}</span>
-              <span class="qb-spk">${esc(q.speaker)}</span>
-              <span>${esc(pick(q))}</span>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <div class="det-actions">
-        <button type="button" class="btn btn-ghost btn-xs" style="color:var(--red);" data-delete-dec="${dec.id}">${t('btnDeleteRec')}</button>
-        <button type="button" class="btn btn-primary btn-xs" data-handoff-dec="${dec.id}">${t('btnHandoffAgent')}</button>
-      </div>
-    `;
-  }
-
-  function formatClipTime(totalStr, pct) {
-    const parts = totalStr.split(':').map(Number);
-    const sec = (parts[0] || 0) * 60 + (parts[1] || 12);
-    return `0:${String(Math.min(sec, Math.round(sec * pct))).padStart(2, '0')} / ${totalStr}`;
-  }
-
-  /* ---------- VIEW 3: DEVICES (FLEET + HARDWARE SELF-CHECK) ---------- */
-  function renderDevicesView() {
+  /* =====================================================================
+   * ADMIN VIEW 3: TEAM DEVICES & DIAGNOSTIC
+   * ===================================================================== */
+  function renderAdminDevicesView() {
     const imgs = {
       silver: 'assets/hero-silver.webp',
       sky: 'assets/hero-sky.webp',
@@ -729,7 +1234,7 @@
               <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
                 <div>
                   <div class="fc-name">${esc(m.name)}</div>
-                  <div class="fc-sub">${finishLabel(m.finish)} · MacBook Air</div>
+                  <div class="fc-sub">${finishLabel(m.finish)} · ${canBeCapturedByPeer(m) ? (state.lang === 'zh' ? '可被他人录' : 'Peers OK') : (state.lang === 'zh' ? '仅限本机' : 'Self only')}</div>
                 </div>
                 ${badge}
               </div>
@@ -757,8 +1262,10 @@
     `;
   }
 
-  /* ---------- VIEW 4: INTEGRATIONS, AGENT & PRIVACY ---------- */
-  function renderIntegrationsView() {
+  /* =====================================================================
+   * AGENT & INTEGRATIONS VIEWS (Employee vs Admin)
+   * ===================================================================== */
+  function renderAgentCard() {
     const chips = state.lang === 'zh'
       ? [
           { id: 'client-email', label: '把刚改的上线日期写封更新发给客户' },
@@ -772,37 +1279,73 @@
         ];
 
     return `
+      <section class="panel section-card">
+        <div class="sc-head">
+          <h2>${t('agentTitle')}</h2>
+          <p>${t('agentDesc')}</p>
+        </div>
+        <form class="agent-form" id="agent-form">
+          <input type="text" id="agent-input" placeholder="${esc(t('agentPlaceholder'))}" autocomplete="off">
+          <button type="submit" class="btn btn-primary">${t('agentRun')}</button>
+        </form>
+        <div class="agent-chips">
+          ${chips.map((c) => `<button type="button" class="agent-chip ${state.agentPreset === c.id ? 'is-active' : ''}" data-agent-preset="${c.id}">${esc(c.label)}</button>`).join('')}
+        </div>
+        ${state.agentResult ? `
+          <div class="agent-draft">
+            <div class="ad-meta">
+              <span>${esc(state.agentResult.citation)}</span>
+              <span>${esc(state.agentResult.channel)}</span>
+            </div>
+            <div class="ad-body">${esc(state.agentResult.body)}</div>
+            <div class="ad-foot">
+              <span>${state.lang === 'zh' ? '基于已确认文字记录生成，未读取原始音频' : 'Grounded in confirmed notes only · No raw audio read'}</span>
+              <button type="button" class="btn btn-primary btn-xs" id="agent-approve-btn" ${state.agentApproved ? 'disabled' : ''}>
+                ${state.agentApproved ? t('agentSent') : t('agentApprove')}
+              </button>
+            </div>
+          </div>
+        ` : ''}
+      </section>
+    `;
+  }
+
+  function renderEmployeeAgentView() {
+    return `
       <div class="int-layout">
-        <div style="display:flex;flex-direction:column;gap:18px;">
-          <section class="panel section-card">
-            <div class="sc-head">
-              <h2>${t('agentTitle')}</h2>
-              <p>${t('agentDesc')}</p>
-            </div>
-            <form class="agent-form" id="agent-form">
-              <input type="text" id="agent-input" placeholder="${esc(t('agentPlaceholder'))}" autocomplete="off">
-              <button type="submit" class="btn btn-primary">${t('agentRun')}</button>
-            </form>
-            <div class="agent-chips">
-              ${chips.map((c) => `<button type="button" class="agent-chip ${state.agentPreset === c.id ? 'is-active' : ''}" data-agent-preset="${c.id}">${esc(c.label)}</button>`).join('')}
-            </div>
-            ${state.agentResult ? `
-              <div class="agent-draft">
-                <div class="ad-meta">
-                  <span>${esc(state.agentResult.citation)}</span>
-                  <span>${esc(state.agentResult.channel)}</span>
+        ${renderAgentCard()}
+
+        <section class="panel section-card">
+          <div class="sc-head">
+            <h2>${state.lang === 'zh' ? '确认后同步去向（团队配置）' : 'Sync Destinations (Workspace Config)'}</h2>
+            <p>${state.lang === 'zh' ? '仅在你点击确认后，文字决定才会推送到以下已启用工具；配置由管理者维护。' : 'Confirmed text notes flow to these active workspace tools.'}</p>
+          </div>
+          <div class="tool-rows">
+            ${state.integrations.map((tool) => `
+              <div class="tool-row">
+                <div class="tr-left">
+                  <div class="tool-mark">${esc(tool.letter)}</div>
+                  <div>
+                    <div class="tr-name">${esc(tool.name)}</div>
+                    <div class="tr-desc">${esc(pick(tool.desc))}</div>
+                  </div>
                 </div>
-                <div class="ad-body">${esc(state.agentResult.body)}</div>
-                <div class="ad-foot">
-                  <span>${state.lang === 'zh' ? '基于已确认文字记录生成，未读取原始音频' : 'Grounded in confirmed notes only · No raw audio read'}</span>
-                  <button type="button" class="btn btn-primary btn-xs" id="agent-approve-btn" ${state.agentApproved ? 'disabled' : ''}>
-                    ${state.agentApproved ? t('agentSent') : t('agentApprove')}
-                  </button>
+                <div class="tr-right">
+                  <span class="tr-mono">${esc(tool.target)}</span>
+                  <span class="badge ${tool.enabled ? 'badge-green' : 'badge-neutral'}">${tool.enabled ? (state.lang === 'zh' ? '已启用' : 'On') : (state.lang === 'zh' ? '已停用' : 'Off')}</span>
                 </div>
               </div>
-            ` : ''}
-          </section>
+            `).join('')}
+          </div>
+        </section>
+      </div>
+    `;
+  }
 
+  function renderAdminIntegrationsView() {
+    return `
+      <div class="int-layout">
+        <div style="display:flex;flex-direction:column;gap:16px;">
           <section class="panel section-card">
             <div class="sc-head">
               <h2>${t('toolsTitle')}</h2>
@@ -830,9 +1373,24 @@
               `).join('')}
             </div>
           </section>
+
+          <section class="panel section-card">
+            <div class="sc-head">
+              <h2>${state.lang === 'zh' ? '管理合规日志（仅记录配置，不含对话内容）' : 'Governance Audit Log (Config only · Zero dialogue)'}</h2>
+              <p>${state.lang === 'zh' ? '追踪声纹名录变更与系统自动清理记录，方便团队安全审计。' : 'Tracks roster updates and auto-expiry runs for workspace governance.'}</p>
+            </div>
+            <div class="tool-rows">
+              ${state.auditLogs.map((log) => `
+                <div class="audit-row">
+                  <span>${esc(pick(log.text))}</span>
+                  <span class="audit-time">${esc(pick(log.time))}</span>
+                </div>
+              `).join('')}
+            </div>
+          </section>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:18px;">
+        <div style="display:flex;flex-direction:column;gap:16px;">
           <section class="panel section-card">
             <div class="sc-head">
               <h2>${t('privacyTitle')}</h2>
@@ -856,21 +1414,20 @@
 
           <section class="panel section-card">
             <div class="sc-head">
-              <h2>${state.lang === 'zh' ? '数据留存与管理权边界' : 'Retention & Admin Scope'}</h2>
-              <p>${state.lang === 'zh' ? '硬件与管理后台默认执行的最小化留存规则。' : 'Default minimization rules enforced across devices and admin console.'}</p>
+              <h2>${state.lang === 'zh' ? '数据留存与权限摘要' : 'Retention & Access Summary'}</h2>
             </div>
             <div class="drawer-kv-list">
               <div class="drawer-kv-row">
-                <span>${state.lang === 'zh' ? '未匹配访客语音' : 'Unmatched visitor audio'}</span>
+                <span>${state.lang === 'zh' ? '未匹配 / 拒收语音' : 'Unauthorized / blocked speech'}</span>
                 <span>${state.lang === 'zh' ? '实时丢弃（0 留存）' : 'Dropped immediately (0 saved)'}</span>
               </div>
               <div class="drawer-kv-row">
-                <span>${state.lang === 'zh' ? '管理员访问范围' : 'Admin access scope'}</span>
-                <span>${state.lang === 'zh' ? '仅成员名单与工具配置' : 'Roster & tool routing only'}</span>
+                <span>${state.lang === 'zh' ? '原声片段自动销毁' : 'Source clip auto-expiry'}</span>
+                <span>${state.lang === 'zh' ? '确认后 7 天自动清理' : '7 days after confirmation'}</span>
               </div>
               <div class="drawer-kv-row">
-                <span>${state.lang === 'zh' ? '原话音频回放权限' : 'Source clip playback'}</span>
-                <span>${state.lang === 'zh' ? '仅限在场参与成员' : 'Present participants only'}</span>
+                <span>${state.lang === 'zh' ? '跨设备收录控制权' : 'Peer-capture override'}</span>
+                <span>${state.lang === 'zh' ? '仅员工本人（管理者只读）' : 'Employee only (Admin read-only)'}</span>
               </div>
             </div>
           </section>
@@ -879,21 +1436,36 @@
     `;
   }
 
-  /* ---------- Render Orchestration & Event Bindings ---------- */
+  /* =====================================================================
+   * RENDER ORCHESTRATION & BINDINGS
+   * ===================================================================== */
   function renderCurrentView() {
     const root = $('#view-container');
-    if (state.activeTab === 'voiceprints') {
-      root.innerHTML = renderVoiceprintsView();
-      bindVoiceprintsEvents(root);
-    } else if (state.activeTab === 'decisions') {
-      root.innerHTML = renderDecisionsView();
-      bindDecisionsEvents(root);
-    } else if (state.activeTab === 'devices') {
-      root.innerHTML = renderDevicesView();
-      bindDevicesEvents(root);
+    if (state.roleMode === 'employee') {
+      if (state.activeTab === 'my-voice') {
+        root.innerHTML = renderEmployeeVoiceView();
+        bindEmployeeVoiceEvents(root);
+      } else if (state.activeTab === 'my-decisions') {
+        root.innerHTML = renderDecisionsView(false);
+        bindDecisionsEvents(root);
+      } else {
+        root.innerHTML = renderEmployeeAgentView();
+        bindIntegrationsEvents(root);
+      }
     } else {
-      root.innerHTML = renderIntegrationsView();
-      bindIntegrationsEvents(root);
+      if (state.activeTab === 'voiceprints') {
+        root.innerHTML = renderAdminVoiceprintsView();
+        bindAdminVoiceprintsEvents(root);
+      } else if (state.activeTab === 'decisions') {
+        root.innerHTML = renderDecisionsView(true);
+        bindDecisionsEvents(root);
+      } else if (state.activeTab === 'devices') {
+        root.innerHTML = renderAdminDevicesView();
+        bindDevicesEvents(root);
+      } else {
+        root.innerHTML = renderAdminIntegrationsView();
+        bindIntegrationsEvents(root);
+      }
     }
   }
 
@@ -902,10 +1474,10 @@
     renderCurrentView();
   }
 
-  function bindVoiceprintsEvents(root) {
-    $('#jump-devices', root)?.addEventListener('click', () => {
-      state.activeTab = 'devices';
-      renderAll();
+  function bindAdminVoiceprintsEvents(root) {
+    $('#jump-emp-consent', root)?.addEventListener('click', () => {
+      state.currentEmployeeId = 'leo';
+      switchRole('employee', 'my-voice');
     });
 
     const input = $('#vp-search-input', root);
@@ -922,7 +1494,6 @@
     $$('[data-vp-filter]', root).forEach((b) => {
       b.addEventListener('click', () => { state.vpFilter = b.dataset.vpFilter; renderCurrentView(); });
     });
-
     $$('[data-open-member]', root).forEach((tr) => {
       tr.addEventListener('click', () => renderMemberDrawer(tr.dataset.openMember));
     });
@@ -944,6 +1515,10 @@
   }
 
   function bindDecisionsEvents(root) {
+    $('#btn-jump-emp-dec', root)?.addEventListener('click', () => {
+      state.currentEmployeeId = 'leo';
+      switchRole('employee', 'my-decisions');
+    });
     $$('[data-dec-filter]', root).forEach((b) => {
       b.addEventListener('click', () => { stopQuotePlayback(); state.decFilter = b.dataset.decFilter; renderCurrentView(); });
     });
@@ -980,7 +1555,7 @@
       b.addEventListener('click', () => {
         const dec = state.decisions.find((d) => d.id === b.dataset.handoffDec);
         if (!dec) return;
-        state.activeTab = 'integrations';
+        state.activeTab = 'my-agent';
         renderAll();
         runAgentCustom(state.lang === 'zh' ? `基于「${pick(dec.title)}」起草团队同步` : `Draft update for "${pick(dec.title)}"`, dec);
       });
@@ -992,7 +1567,7 @@
         lastDeletedDecision = { item: state.decisions.splice(idx, 1)[0], idx };
         state.selectedDecisionId = state.decisions[0]?.id || null;
         renderAll();
-        showToast(state.lang === 'zh' ? '已删除该条记录与关联原话' : 'Record & source clip deleted', t('undo'), () => {
+        showToast(state.lang === 'zh' ? '已删除该条记录并销毁关联原话' : 'Record & source clip destroyed', t('undo'), () => {
           if (lastDeletedDecision) {
             state.decisions.splice(lastDeletedDecision.idx, 0, lastDeletedDecision.item);
             state.selectedDecisionId = lastDeletedDecision.item.id;
@@ -1012,7 +1587,7 @@
       b.addEventListener('click', () => {
         const mode = b.dataset.diag;
         setHardwareState(mode);
-        if (mode === 'visitor') showVisitorNotice();
+        if (mode === 'visitor') showPrivacyNotice(false);
       });
     });
     $('#btn-toggle-lid', root)?.addEventListener('click', () => {
@@ -1070,7 +1645,7 @@
     part.confirmed = !part.confirmed;
     if (dec.participants.every((p) => p.confirmed)) {
       dec.status = 'synced';
-      showToast(state.lang === 'zh' ? '已确认，同步至 Linear / Notion / Slack' : 'Confirmed & synced to Linear, Notion, and Slack');
+      showToast(state.lang === 'zh' ? '双方已确认，同步至团队空间与 Linear / Notion / Slack' : 'Confirmed & synced to workspace tools');
     }
     renderAll();
     if (fromNotice) showDecisionNotice(decisionId);
@@ -1284,6 +1859,10 @@
         barState: 'online',
         lastHeard: { zh: '刚刚录入', en: 'Just enrolled' },
         active: true,
+        allowPeerCapture: true,
+        tempPauseMinutes: 0,
+        requireMyConfirm: true,
+        lidStandby: true,
         bars
       });
       showToast(state.lang === 'zh' ? `已添加 ${name} 至声纹白名单` : `Added ${name} to voiceprint roster`);
@@ -1316,20 +1895,19 @@
   function runDirectorShot(shot) {
     $('#director-drawer').hidden = true;
     closeMemberDrawer();
+    $('#floating-card').hidden = true;
 
-    if (shot === 'sceneD') {
-      state.activeTab = 'devices';
-      setHardwareState('visitor');
-      renderAll();
-      showVisitorNotice();
-    } else if (shot === 'sceneS1') {
-      state.activeTab = 'devices';
-      $('#floating-card').hidden = true;
-      setHardwareState('mute');
+    if (shot === 'scenePeerBlock') {
+      const leo = memberById('leo');
+      if (leo) { leo.active = true; leo.allowPeerCapture = false; leo.tempPauseMinutes = 0; }
+      state.currentEmployeeId = 'leo';
+      switchRole('employee', 'my-voice');
+      showPrivacyNotice(true);
+    } else if (shot === 'sceneAdminLock') {
+      switchRole('admin', 'decisions');
+      state.selectedDecisionId = 'dec-silver';
       renderAll();
     } else if (shot === 'sceneA') {
-      state.activeTab = 'decisions';
-      state.decFilter = 'all';
       const dec = state.decisions.find((d) => d.id === 'dec-launch');
       if (dec) {
         dec.status = 'pending';
@@ -1337,39 +1915,37 @@
         dec.participants[1].confirmed = false;
         state.selectedDecisionId = dec.id;
       }
+      state.currentEmployeeId = 'leo';
       state.hwState = 'input';
-      renderAll();
+      switchRole('employee', 'my-decisions');
       showDecisionNotice('dec-launch');
     } else if (shot === 'sceneC') {
-      state.activeTab = 'decisions';
-      state.decFilter = 'all';
+      state.currentEmployeeId = 'maya';
       state.selectedDecisionId = 'dec-silver';
-      $('#floating-card').hidden = true;
-      renderAll();
+      switchRole('employee', 'my-decisions');
       startQuotePlayback('dec-silver');
+    } else if (shot === 'sceneD') {
+      switchRole('admin', 'devices');
+      setHardwareState('visitor');
+      showPrivacyNotice(false);
+    } else if (shot === 'sceneS1') {
+      switchRole('admin', 'devices');
+      setHardwareState('mute');
     } else if (shot === 'sceneE') {
-      state.activeTab = 'integrations';
-      $('#floating-card').hidden = true;
-      renderAll();
+      state.currentEmployeeId = 'maya';
+      switchRole('employee', 'my-agent');
       runAgentPreset('client-email');
     } else if (shot === 'sceneL4') {
-      state.activeTab = 'devices';
       state.multiBarSync = true;
       state.hwState = 'input';
-      $('#floating-card').hidden = true;
-      renderAll();
+      switchRole('admin', 'devices');
     }
   }
 
   /* ---------- Global Wiring ---------- */
   function initGlobalEvents() {
-    $$('.rail-item').forEach((b) => {
-      b.addEventListener('click', () => {
-        stopQuotePlayback();
-        closeMemberDrawer();
-        state.activeTab = b.dataset.tab;
-        renderAll();
-      });
+    $$('.role-btn').forEach((b) => {
+      b.addEventListener('click', () => switchRole(b.dataset.role));
     });
 
     $$('.lang-btn').forEach((b) => {
@@ -1380,11 +1956,16 @@
       });
     });
 
+    $('#rail-device-status').addEventListener('click', () => {
+      state.activeTab = state.roleMode === 'employee' ? 'my-voice' : 'devices';
+      renderAll();
+    });
+
     $('#member-drawer-backdrop').addEventListener('click', (e) => {
       if (e.target === $('#member-drawer-backdrop')) closeMemberDrawer();
     });
 
-    // Optional menu bar popover
+    // Native macOS Menu Bar Popover
     const mbBtn = $('#menubar-rutta-btn');
     const mbPop = $('#menubar-popover');
     mbBtn.addEventListener('click', (e) => {
@@ -1399,8 +1980,22 @@
         mbBtn.setAttribute('aria-expanded', 'false');
       }
     });
-    $('#mbp-toggle-mute').addEventListener('click', () => setHardwareState(state.hwState === 'mute' ? 'ready' : 'mute'));
-    $('#mbp-trigger-card').addEventListener('click', () => { mbPop.hidden = true; showDecisionNotice('dec-launch'); });
+    $('#mbp-toggle-peer').addEventListener('click', () => {
+      const emp = currentEmployee();
+      emp.allowPeerCapture = !emp.allowPeerCapture;
+      renderAll();
+    });
+    $('#mbp-toggle-mute').addEventListener('click', () => {
+      const emp = currentEmployee();
+      emp.barState = emp.barState === 'muted' ? 'online' : 'muted';
+      setHardwareState(emp.barState === 'muted' ? 'mute' : 'ready');
+    });
+    $('#mbp-toggle-pause').addEventListener('click', () => {
+      const emp = currentEmployee();
+      emp.tempPauseMinutes = emp.tempPauseMinutes > 0 ? 0 : 30;
+      mbPop.hidden = true;
+      renderAll();
+    });
 
     // Enroll modal
     $('#enroll-close').addEventListener('click', () => { stopVoiceSampling(); $('#enroll-modal').hidden = true; });
@@ -1440,7 +2035,6 @@
       closeMemberDrawer();
       state = window.createInitialRuttaState();
       state.lang = keepLang;
-      $('#toggle-menubar').checked = false;
       $('#floating-card').hidden = true;
       $('#director-drawer').hidden = true;
       renderAll();
@@ -1454,6 +2048,7 @@
         $('#delete-modal').hidden = true;
         $('#director-drawer').hidden = true;
         $('#floating-card').hidden = true;
+        $('#menubar-popover').hidden = true;
         closeMemberDrawer();
         stopVoiceSampling();
       } else if (e.key.toLowerCase() === 'h') {
