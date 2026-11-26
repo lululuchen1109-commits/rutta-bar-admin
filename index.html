@@ -3,267 +3,258 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rutta Bar</title>
+  <title>Rutta Bar Admin · 团队声纹与硬件后台</title>
   <link rel="icon" type="image/svg+xml" href="assets/monogram.svg">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Optional macOS Menu Bar (off by default so it looks clean in any browser; toggleable in Demo panel for screen recording) -->
-  <div class="macos-menubar" id="macos-menubar" role="banner" aria-label="macOS Menu Bar" hidden>
-    <div class="mb-left">
-      <span class="mb-apple" aria-hidden="true"></span>
-      <strong class="mb-app">Rutta Bar</strong>
-      <span class="mb-item" data-i18n="menuFile">文件</span>
-      <span class="mb-item" data-i18n="menuEdit">编辑</span>
-      <span class="mb-item" data-i18n="menuView">显示</span>
+  <!-- Optional macOS Menu Bar (off by default, toggleable in Shot Director for screen recording) -->
+  <div class="os-menubar" id="macos-menubar" hidden>
+    <div class="osm-left">
+      <span class="osm-apple" aria-hidden="true"></span>
+      <strong>Rutta Bar</strong>
+      <span data-i18n="menuFile">文件</span>
+      <span data-i18n="menuEdit">编辑</span>
+      <span data-i18n="menuView">视图</span>
     </div>
-    <div class="mb-right">
-      <button type="button" class="mb-rutta" id="menubar-rutta-btn" aria-expanded="false" aria-controls="menubar-popover">
+    <div class="osm-right">
+      <button type="button" class="osm-rutta" id="menubar-rutta-btn" aria-expanded="false">
         <img src="assets/monogram.svg" alt="" width="10" height="13">
-        <span class="status-dot dot-ready" id="mb-status-dot"></span>
+        <span class="dot dot-ready" id="mb-status-dot"></span>
         <span id="mb-status-label">待机中</span>
       </button>
-      <span class="mb-sys">Thu 14:22</span>
+      <span class="osm-clock">Thu 14:22</span>
     </div>
-
-    <div class="mb-popover" id="menubar-popover" hidden>
-      <div class="mbp-row">
+    <div class="osm-popover" id="menubar-popover" hidden>
+      <div class="osmp-head">
         <div>
-          <div class="mbp-title">Rutta Bar · Silver</div>
-          <div class="mbp-sub" id="mbp-sub">已连接 · 绿灯缓慢呼吸</div>
+          <div class="osmp-title">Rutta Bar · Silver</div>
+          <div class="osmp-sub" id="mbp-sub">USB-C 已连接 · 呼吸绿灯</div>
         </div>
-        <span class="mbp-state" id="mbp-pill">待机中</span>
+        <span class="badge badge-neutral" id="mbp-pill">待机中</span>
       </div>
-      <div class="mbp-img-wrap">
-        <img id="mbp-bar-img" src="assets/switch-photo-ready.webp" alt="Rutta Bar">
-      </div>
-      <div class="mbp-meta">
-        <span><b id="mbp-enrolled-count">4</b> <span data-i18n="mbpEnrolled">位成员在线</span></span>
-        <span>·</span>
-        <span><b id="mbp-pending-count">2</b> <span data-i18n="mbpPending">条待确认</span></span>
-      </div>
-      <div class="mbp-foot">
-        <button type="button" class="btn-outline btn-xs" id="mbp-toggle-mute" data-i18n="mbpMuteBtn">切换静音</button>
-        <button type="button" class="btn-outline btn-xs" id="mbp-trigger-card" data-i18n="mbpCardBtn">查看最近记录</button>
+      <div class="osmp-bar"><img id="mbp-bar-img" src="assets/switch-photo-ready.webp" alt="Rutta Bar"></div>
+      <div class="osmp-foot">
+        <button type="button" class="btn btn-secondary btn-xs" id="mbp-toggle-mute" data-i18n="mbpMuteBtn">物理静音</button>
+        <button type="button" class="btn btn-secondary btn-xs" id="mbp-trigger-card" data-i18n="mbpCardBtn">最近记录</button>
       </div>
     </div>
   </div>
 
-  <!-- Subtle Floating Notification Card (appears when a spoken decision or visitor event happens) -->
-  <aside class="notice-card" id="floating-card" aria-live="polite" hidden></aside>
+  <!-- Floating Top-Right Notification Card (for live capture / visitor notice) -->
+  <aside class="float-notice" id="floating-card" aria-live="polite" hidden></aside>
 
-  <!-- Full-bleed Native-Feeling App Shell -->
-  <div class="shell">
-    <aside class="sidebar" aria-label="Navigation">
-      <div class="sidebar-top">
-        <div class="workspace-head">
-          <img class="brand-mark" src="assets/monogram.svg" alt="Rutta" width="16" height="20">
-          <div class="workspace-meta">
-            <span class="workspace-name">Northstar</span>
-            <span class="workspace-sub">Rutta Bar</span>
+  <!-- Main Admin Console Shell -->
+  <div class="admin-shell">
+    <!-- Left Navigation Rail -->
+    <aside class="rail" aria-label="Primary Navigation">
+      <div class="rail-header">
+        <div class="brand-row">
+          <div class="brand-icon"><img src="assets/monogram.svg" alt="Rutta" width="15" height="19"></div>
+          <div class="brand-copy">
+            <div class="brand-title">Rutta Bar</div>
+            <div class="brand-org">Northstar Studio</div>
           </div>
         </div>
-
-        <nav class="nav" role="tablist" aria-orientation="vertical">
-          <button type="button" class="nav-link is-active" data-tab="voiceprints" role="tab" aria-selected="true">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4.5 10v0M7.25 7.2v5.6M10 4.8v10.4M12.75 7.2v5.6M15.5 10v0"/></svg>
-            <span data-i18n="navVoiceprints">团队成员</span>
-            <span class="nav-count" id="nav-count-vp">5</span>
-          </button>
-          <button type="button" class="nav-link" data-tab="decisions" role="tab" aria-selected="false">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 6h11M4.5 10h8M4.5 14h5.5"/><path d="M13 13.5l1.6 1.6 3-3.2"/></svg>
-            <span data-i18n="navDecisions">记下来的事</span>
-            <span class="nav-count is-warm" id="nav-count-pending">2</span>
-          </button>
-          <button type="button" class="nav-link" data-tab="integrations" role="tab" aria-selected="false">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M7.5 12.5l5-5M9 5.5l1.5-1.5a3 3 0 114.24 4.24L13.2 9.8M11 14.5l-1.5 1.5a3 3 0 11-4.24-4.24l1.54-1.56"/></svg>
-            <span data-i18n="navIntegrations">同步与 Agent</span>
-          </button>
-          <button type="button" class="nav-link" data-tab="devices" role="tab" aria-selected="false">
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="15" height="6" rx="2.5"/><circle cx="6.2" cy="10" r="0.9" fill="currentColor" stroke="none"/><path d="M10.8 10h3.2"/></svg>
-            <span data-i18n="navDevices">设备与隐私</span>
-          </button>
-        </nav>
       </div>
 
-      <div class="sidebar-bottom">
-        <div class="device-status-quiet" id="sidebar-device-status">
-          <span class="status-dot dot-ready" id="sidebar-led-dot"></span>
-          <div class="dsq-text">
-            <div class="dsq-title" id="sidebar-hw-label">银色 Bar · 待机中</div>
-            <div class="dsq-sub" data-i18n="sidebarSub">只听已加入的成员</div>
+      <nav class="rail-nav" role="tablist" aria-orientation="vertical">
+        <div class="rail-group-label" data-i18n="railGroupCore">团队管理</div>
+        <button type="button" class="rail-item is-active" data-tab="voiceprints" role="tab" aria-selected="true">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M4 10v0M7 7v6M10 4.5v11M13 7v6M16 10v0"/></svg>
+          <span data-i18n="navVoiceprints">声纹管理</span>
+          <span class="rail-count" id="nav-count-vp">5</span>
+        </button>
+        <button type="button" class="rail-item" data-tab="decisions" role="tab" aria-selected="false">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="13" height="13" rx="2.5"/><path d="M7 10.2l2 2 4-4.2"/></svg>
+          <span data-i18n="navDecisions">决定与记录</span>
+          <span class="rail-count is-accent" id="nav-count-pending">2</span>
+        </button>
+
+        <div class="rail-group-label" data-i18n="railGroupSystem">硬件与系统</div>
+        <button type="button" class="rail-item" data-tab="devices" role="tab" aria-selected="false">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.8" width="15" height="6.4" rx="2.4"/><circle cx="6.2" cy="10" r="0.95" fill="currentColor" stroke="none"/><path d="M10.8 10h3.2"/></svg>
+          <span data-i18n="navDevices">设备管理</span>
+          <span class="rail-count">4</span>
+        </button>
+        <button type="button" class="rail-item" data-tab="integrations" role="tab" aria-selected="false">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="10" cy="14" r="2"/><path d="M7.6 7.4L9.2 12.2M12.4 7.4l-1.6 4.8M8 6h4"/></svg>
+          <span data-i18n="navIntegrations">集成与隐私</span>
+        </button>
+      </nav>
+
+      <div class="rail-footer">
+        <div class="rail-device-status" id="rail-device-status">
+          <span class="dot dot-ready" id="sidebar-led-dot"></span>
+          <div class="rds-copy">
+            <div class="rds-title" id="sidebar-hw-label">4 台 Bar 在线</div>
+            <div class="rds-sub" data-i18n="sidebarSub">声纹门禁已开启</div>
           </div>
         </div>
 
-        <div class="sidebar-utils">
-          <div class="lang-toggle" role="group" aria-label="Language">
-            <button type="button" class="lang-opt is-active" data-lang="zh">中文</button>
-            <span aria-hidden="true">/</span>
-            <button type="button" class="lang-opt" data-lang="en">EN</button>
+        <div class="rail-bottom-bar">
+          <div class="lang-seg" role="group" aria-label="Language">
+            <button type="button" class="lang-btn is-active" data-lang="zh">中文</button>
+            <button type="button" class="lang-btn" data-lang="en">EN</button>
           </div>
-          <button type="button" class="director-subtle-btn" id="director-trigger" title="快捷键 D">
-            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3.5" width="12" height="9" rx="1.8"/><path d="M6.8 6.3l3 1.7-3 1.7V6.3z"/></svg>
-            <span data-i18n="directorBtn">拍摄演示</span>
+          <button type="button" class="director-icon-btn" id="director-trigger" title="拍摄演示分镜 (快捷键 D)">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3.5" width="12" height="9" rx="1.8"/><path d="M6.8 6.3l3 1.7-3 1.7V6.3z"/></svg>
+            <span data-i18n="directorBtn">分镜</span>
           </button>
         </div>
       </div>
     </aside>
 
-    <!-- Main Reading/Working Canvas -->
-    <main class="canvas">
-      <div class="canvas-inner" id="view-container">
-        <!-- Dynamically rendered per active tab -->
-      </div>
-      <footer class="canvas-foot">
-        <span data-i18n="disclaimerText">概念界面示意（暂无实物样机）· 人物、声音与对话均为虚构示例</span>
+    <!-- Right Workspace Column -->
+    <div class="workspace">
+      <header class="ws-topbar">
+        <div class="ws-topbar-left">
+          <h1 class="ws-title" id="topbar-title">声纹管理</h1>
+          <span class="ws-subtitle" id="topbar-subtitle">仅识别已加入团队成员，访客声音不亮灯、不留存</span>
+        </div>
+        <div class="ws-topbar-right" id="topbar-actions">
+          <!-- Context-aware action button -->
+        </div>
+      </header>
+
+      <main class="ws-content" id="view-container">
+        <!-- Active view renders here -->
+      </main>
+
+      <footer class="ws-footer">
+        <span data-i18n="disclaimerText">Rutta Bar 概念管理后台 · 页面中人物、声纹与对话均为模拟数据</span>
       </footer>
-    </main>
+    </div>
   </div>
 
-  <!-- Add / Re-enroll Voiceprint Sheet -->
-  <div class="sheet-backdrop" id="enroll-modal" hidden>
-    <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="enroll-modal-title">
-      <div class="sheet-head">
+  <!-- Right-Side Member Voiceprint Inspector Drawer -->
+  <div class="drawer-backdrop" id="member-drawer-backdrop" hidden>
+    <aside class="inspector-drawer" id="member-drawer" role="dialog" aria-modal="true" aria-label="Member Voiceprint Details"></aside>
+  </div>
+
+  <!-- Add / Re-enroll Voiceprint Modal -->
+  <div class="modal-backdrop" id="enroll-modal" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="enroll-modal-title">
+      <div class="modal-header">
         <div>
           <h2 id="enroll-modal-title" data-i18n="enrollTitle">添加成员声纹</h2>
-          <p class="sheet-sub" data-i18n="enrollSub">录一句短话就行。加入后随时可以暂停或删掉，不会留痕。</p>
+          <p class="modal-desc" data-i18n="enrollSub">朗读一句示例完成声纹绑定，成员随时可暂停或删除退出。</p>
         </div>
-        <button type="button" class="btn-icon" id="enroll-close" aria-label="Close">
+        <button type="button" class="icon-btn" id="enroll-close" aria-label="Close">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
         </button>
       </div>
-
-      <div class="sheet-body">
-        <div class="field-grid">
-          <label class="field">
-            <span data-i18n="fieldName">姓名</span>
-            <input type="text" id="enroll-name" placeholder="比如：林溪 / Hannah" autocomplete="off">
+      <div class="modal-body">
+        <div class="form-grid-2">
+          <label class="form-field">
+            <span data-i18n="fieldName">成员姓名</span>
+            <input type="text" id="enroll-name" placeholder="例如：林溪 / Hannah" autocomplete="off">
           </label>
-          <label class="field">
-            <span data-i18n="fieldRole">角色</span>
-            <input type="text" id="enroll-role" placeholder="比如：iOS 开发" autocomplete="off">
+          <label class="form-field">
+            <span data-i18n="fieldRole">岗位 / 角色</span>
+            <input type="text" id="enroll-role" placeholder="例如：iOS 工程师" autocomplete="off">
           </label>
         </div>
-
-        <div class="field">
-          <span data-i18n="fieldFinish">她 / 他的 Rutta Bar</span>
-          <div class="finish-row" id="enroll-finish-selector">
-            <button type="button" class="finish-opt is-selected" data-finish="silver"><i class="sw-silver"></i><span data-i18n="finishSilver">银色</span></button>
-            <button type="button" class="finish-opt" data-finish="sky"><i class="sw-sky"></i><span data-i18n="finishSky">天蓝</span></button>
-            <button type="button" class="finish-opt" data-finish="starlight"><i class="sw-starlight"></i><span data-i18n="finishStarlight">星光</span></button>
-            <button type="button" class="finish-opt" data-finish="midnight"><i class="sw-midnight"></i><span data-i18n="finishMidnight">午夜</span></button>
+        <div class="form-field">
+          <span data-i18n="fieldEmail">团队邮箱</span>
+          <input type="email" id="enroll-email" placeholder="name@northstar.co" autocomplete="off">
+        </div>
+        <div class="form-field">
+          <span data-i18n="fieldFinish">配对的 Rutta Bar 外观</span>
+          <div class="finish-grid" id="enroll-finish-selector">
+            <button type="button" class="finish-btn is-selected" data-finish="silver"><i class="sw sw-silver"></i><span data-i18n="finishSilver">银色</span></button>
+            <button type="button" class="finish-btn" data-finish="sky"><i class="sw sw-sky"></i><span data-i18n="finishSky">天蓝</span></button>
+            <button type="button" class="finish-btn" data-finish="starlight"><i class="sw sw-starlight"></i><span data-i18n="finishStarlight">星光</span></button>
+            <button type="button" class="finish-btn" data-finish="midnight"><i class="sw sw-midnight"></i><span data-i18n="finishMidnight">午夜</span></button>
           </div>
         </div>
-
-        <div class="voice-box" id="voice-capture-box" data-state="idle">
-          <div class="vb-hint" data-i18n="vcPromptLabel">请照常读出下面这句话</div>
-          <p class="vb-sentence" id="vc-quote">“我是新加入的同事，只有在工位讨论工作时才记录，我随时可以退出。”</p>
-          <div class="vb-wave" id="vc-wave" aria-hidden="true"></div>
-          <div class="vb-foot">
-            <span class="vb-status" id="vc-status-text" data-i18n="vcIdle">准备好就可以开始</span>
-            <div class="vb-btns">
-              <button type="button" class="btn-outline btn-xs" id="btn-mic-sample" data-i18n="vcRealMicBtn">用本机麦克风</button>
-              <button type="button" class="btn-solid btn-xs" id="btn-start-sample">
-                <span id="btn-sample-label" data-i18n="vcStartBtn">模拟录一段（3 秒）</span>
-              </button>
+        <div class="enroll-recorder" id="voice-capture-box" data-state="idle">
+          <div class="er-label" data-i18n="vcPromptLabel">请照常读出以下校准句</div>
+          <p class="er-quote" id="vc-quote">“我是新加入的同事，同意在工作讨论时识别我的声音，随时可以退出。”</p>
+          <div class="er-wave" id="vc-wave" aria-hidden="true"></div>
+          <div class="er-foot">
+            <span class="er-status" id="vc-status-text" data-i18n="vcIdle">点击下方按钮开始声纹采样</span>
+            <div class="er-actions">
+              <button type="button" class="btn btn-secondary btn-xs" id="btn-mic-sample" data-i18n="vcRealMicBtn">本机麦克风</button>
+              <button type="button" class="btn btn-primary btn-xs" id="btn-start-sample"><span id="btn-sample-label" data-i18n="vcStartBtn">开始采样（3 秒）</span></button>
             </div>
           </div>
         </div>
       </div>
-
-      <div class="sheet-foot">
-        <button type="button" class="btn-text" id="enroll-cancel" data-i18n="cancel">取消</button>
-        <button type="button" class="btn-solid" id="enroll-save" disabled data-i18n="enrollConfirmBtn">完成加入</button>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="enroll-cancel" data-i18n="cancel">取消</button>
+        <button type="button" class="btn btn-primary" id="enroll-save" disabled data-i18n="enrollConfirmBtn">确认添加</button>
       </div>
     </div>
   </div>
 
-  <!-- Calm Delete Confirmation Sheet -->
-  <div class="sheet-backdrop" id="delete-modal" hidden>
-    <div class="sheet-card sheet-sm" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
-      <div class="sheet-head">
-        <h2 id="delete-modal-title" data-i18n="deleteTitle">移除声纹</h2>
-        <button type="button" class="btn-icon" id="delete-close" aria-label="Close">
+  <!-- Delete Voiceprint Confirmation Modal -->
+  <div class="modal-backdrop" id="delete-modal" hidden>
+    <div class="modal-box modal-sm" role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
+      <div class="modal-header">
+        <h2 id="delete-modal-title" data-i18n="deleteTitle">移除成员声纹</h2>
+        <button type="button" class="icon-btn" id="delete-close" aria-label="Close">
           <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
         </button>
       </div>
-      <div class="sheet-body">
-        <p class="del-lead" id="delete-desc"></p>
-        <p class="del-note" data-i18n="deleteNote">移除后，Rutta Bar 不会再识别这个声音——以后在工位旁说话时，设备灯不会亮，也不会转写或保存。已经确认进知识库的文字记录不受影响。</p>
+      <div class="modal-body">
+        <p class="del-title" id="delete-desc"></p>
+        <p class="del-body" data-i18n="deleteNote">移除后，Rutta Bar 将立即销毁该声纹。此后该成员在设备旁说话时，状态灯不会亮起，也不会转写或留存任何音频；历史已确认的团队文字记录不受影响。</p>
       </div>
-      <div class="sheet-foot">
-        <button type="button" class="btn-text" id="delete-cancel" data-i18n="cancel">先留着</button>
-        <button type="button" class="btn-danger" id="delete-confirm" data-i18n="deleteConfirmBtn">确认移除</button>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" id="delete-cancel" data-i18n="cancel">取消</button>
+        <button type="button" class="btn btn-danger" id="delete-confirm" data-i18n="deleteConfirmBtn">确认移除</button>
       </div>
     </div>
   </div>
 
-  <!-- Discreet Content-Team Shot Director Panel (Toggle with 'D', Clean Recording with 'H') -->
-  <aside class="director-panel" id="director-drawer" hidden aria-label="Demo Shots">
-    <div class="dp-head">
+  <!-- Discreet Content-Team Shot Director (Press D to open, H for clean screen recording) -->
+  <aside class="director-pop" id="director-drawer" hidden aria-label="Demo Shots">
+    <div class="dp-top">
       <div>
-        <strong data-i18n="ddTitle">拍摄演示分镜</strong>
-        <span data-i18n="ddSub">仅用于内容部录屏，按 H 隐藏底部入口</span>
+        <strong data-i18n="ddTitle">内容部拍摄分镜</strong>
+        <span data-i18n="ddSub">一键触发宣发核心镜头 · 按 H 隐藏辅助入口</span>
       </div>
-      <button type="button" class="btn-icon" id="director-close" aria-label="Close">
+      <button type="button" class="icon-btn" id="director-close" aria-label="Close">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
       </button>
     </div>
     <div class="dp-list">
-      <button type="button" class="dp-item" data-shot="sceneD">
-        <span class="dp-code">L2 · D</span>
-        <div>
-          <strong data-i18n="shotDTitle">访客开口 · 顶灯不亮</strong>
-          <small data-i18n="shotDDesc">未加入的人说话，直接忽略且右上角给安静提示</small>
-        </div>
+      <button type="button" class="dp-btn" data-shot="sceneD">
+        <span class="dp-k">D · L2</span>
+        <div><strong data-i18n="shotDTitle">访客开口 · 灯不亮</strong><small data-i18n="shotDDesc">跳到设备自检并弹出未记录拦截提示</small></div>
       </button>
-      <button type="button" class="dp-item" data-shot="sceneS1">
-        <span class="dp-code">S1</span>
-        <div>
-          <strong data-i18n="shotS1Title">拨动物理静音 · 露出橙标</strong>
-          <small data-i18n="shotS1Desc">硬断麦、指示灯熄灭</small>
-        </div>
+      <button type="button" class="dp-btn" data-shot="sceneS1">
+        <span class="dp-k">S1</span>
+        <div><strong data-i18n="shotS1Title">物理静音 · 露出橙标</strong><small data-i18n="shotS1Desc">拨动侧边机械滑键，顶灯熄灭</small></div>
       </button>
-      <button type="button" class="dp-item" data-shot="sceneA">
-        <span class="dp-code">A · F4</span>
-        <div>
-          <strong data-i18n="shotATitle">工位改日期 + 两人确认</strong>
-          <small data-i18n="shotADesc">右上角弹出记录卡，点击确认后同步到工具</small>
-        </div>
+      <button type="button" class="dp-btn" data-shot="sceneA">
+        <span class="dp-k">A · F4</span>
+        <div><strong data-i18n="shotATitle">工位改日期 + 双人确认</strong><small data-i18n="shotADesc">右上角弹出记录卡，点击确认同步至工具</small></div>
       </button>
-      <button type="button" class="dp-item" data-shot="sceneC">
-        <span class="dp-code">C · F1</span>
-        <div>
-          <strong data-i18n="shotCTitle">谁记错了 · 听原话</strong>
-          <small data-i18n="shotCDesc">展开时间点与原声波形</small>
-        </div>
+      <button type="button" class="dp-btn" data-shot="sceneC">
+        <span class="dp-k">C · F1</span>
+        <div><strong data-i18n="shotCTitle">谁记错了 · 听原话</strong><small data-i18n="shotCDesc">定位时间戳并播放原声波形</small></div>
       </button>
-      <button type="button" class="dp-item" data-shot="sceneE">
-        <span class="dp-code">E · F2</span>
-        <div>
-          <strong data-i18n="shotETitle">一句话交给 Agent</strong>
-          <small data-i18n="shotEDesc">引用刚确认的决定起草发给客户的更新</small>
-        </div>
+      <button type="button" class="dp-btn" data-shot="sceneE">
+        <span class="dp-k">E · F2</span>
+        <div><strong data-i18n="shotETitle">一句话交给 Agent</strong><small data-i18n="shotEDesc">引用刚确认的口头决定起草邮件</small></div>
       </button>
-      <button type="button" class="dp-item" data-shot="sceneL4">
-        <span class="dp-code">L4</span>
-        <div>
-          <strong data-i18n="shotL4Title">三台 Mac 一起亮灯</strong>
-          <small data-i18n="shotL4Desc">工位旁多人讨论，自动合并为同一条记录</small>
-        </div>
+      <button type="button" class="dp-btn" data-shot="sceneL4">
+        <span class="dp-k">L4</span>
+        <div><strong data-i18n="shotL4Title">三台 Mac 同步亮灯</strong><small data-i18n="shotL4Desc">工位多人讨论自动合并去重</small></div>
       </button>
     </div>
-    <div class="dp-opts">
-      <label class="dp-check"><input type="checkbox" id="toggle-menubar"><span data-i18n="ddToggleMenubar">显示模拟 macOS 顶部菜单栏</span></label>
-      <label class="dp-check"><input type="checkbox" id="toggle-sound" checked><span data-i18n="ddToggleSound">物理开关拨动轻响</span></label>
+    <div class="dp-checks">
+      <label><input type="checkbox" id="toggle-menubar"><span data-i18n="ddToggleMenubar">显示模拟 macOS 顶部菜单栏</span></label>
+      <label><input type="checkbox" id="toggle-sound" checked><span data-i18n="ddToggleSound">物理滑键拨动微音效</span></label>
     </div>
     <div class="dp-foot">
-      <button type="button" class="btn-outline btn-xs" id="dd-clean-mode" data-i18n="ddCleanMode">纯净录屏（H）</button>
-      <button type="button" class="btn-text btn-xs" id="dd-reset" data-i18n="ddReset">恢复初始状态</button>
+      <button type="button" class="btn btn-secondary btn-xs" id="dd-clean-mode" data-i18n="ddCleanMode">纯净录屏（H）</button>
+      <button type="button" class="btn btn-ghost btn-xs" id="dd-reset" data-i18n="ddReset">重置数据</button>
     </div>
   </aside>
 
-  <!-- Subtle Toast -->
   <div class="toast-region" id="toast-stack" aria-live="polite"></div>
 
   <script src="data.js"></script>
