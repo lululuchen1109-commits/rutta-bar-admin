@@ -1578,4 +1578,20 @@
 
   initGlobalEvents();
   renderAll();
+
+  // Warm-cache secondary hardware renders in background so tab/state switches feel instant on public URL
+  window.addEventListener('load', () => {
+    [
+      'assets/switch-photo-input.webp',
+      'assets/switch-photo-mute.webp',
+      'assets/hero-silver.webp',
+      'assets/hero-sky.webp',
+      'assets/hero-starlight.webp',
+      'assets/hero-midnight.webp',
+      'assets/closedside-1200.webp'
+    ].forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  });
 })();
