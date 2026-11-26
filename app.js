@@ -1,14 +1,13 @@
-/* Rutta macOS Desktop App · Dual-Role Controller (Employee Personal App + Workspace Admin) */
+/* Rutta for Mac v5 · Native macOS Window, Memory Stream & Voiceprint Circle Controller */
 (() => {
   'use strict';
 
   let state = window.createInitialRuttaState();
-  // Support optional ?role=admin or ?role=employee deep link
   try {
     const params = new URLSearchParams(window.location.search);
     if (params.get('role') === 'admin') {
       state.roleMode = 'admin';
-      state.activeTab = 'voiceprints';
+      state.activeTab = 'circle';
     }
   } catch (_) {}
 
@@ -31,17 +30,18 @@
   const ICONS = {
     plus: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round"><path d="M8 3.2v9.6M3.2 8h9.6"/></svg>',
     search: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.4"/><path d="M10.4 10.4L13.6 13.6" stroke-linecap="round"/></svg>',
-    shield: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"><path d="M8 2.2L3 4.2v3.6c0 3.1 2.1 5.1 5 6 2.9-.9 5-2.9 5-6V4.2L8 2.2z"/></svg>',
-    play: '<svg viewBox="0 0 12 12" fill="currentColor"><path d="M3 2.2l7 3.8-7 3.8V2.2z"/></svg>',
-    pause: '<svg viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="2.2" width="2.4" height="7.6" rx="0.6"/><rect x="7.1" y="2.2" width="2.4" height="7.6" rx="0.6"/></svg>',
-    lock: '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.3" width="8" height="5.5" rx="1.4"/><path d="M4.8 6.3V4.6a2.2 2.2 0 014.4 0v1.7"/></svg>',
-    close: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
-    wave: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round"><path d="M4 10v0M7 7v6M10 4.5v11M13 7v6M16 10v0"/></svg>',
-    check: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="13" height="13" rx="2.5"/><path d="M7 10.2l2 2 4-4.2"/></svg>',
-    bar: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6.8" width="15" height="6.4" rx="2.4"/><circle cx="6.2" cy="10" r="0.95" fill="currentColor" stroke="none"/><path d="M10.8 10h3.2"/></svg>',
-    nodes: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.55" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2"/><circle cx="14" cy="6" r="2"/><circle cx="10" cy="14" r="2"/><path d="M7.6 7.4L9.2 12.2M12.4 7.4l-1.6 4.8M8 6h4"/></svg>',
-    arrowRight: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h12M11.5 5.5L16 10l-4.5 4.5"/></svg>',
-    clock: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2.1 1.3"/></svg>'
+    lock: '<svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6.3" width="8" height="5.5" rx="1.4"/><path d="M4.8 6.3V4.6a2.2 2.2 0 014.4 0v1.7"/></svg>',
+    play: '<svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><path d="M3.2 2.2l6.8 3.8-6.8 3.8V2.2z"/></svg>',
+    pause: '<svg width="10" height="10" viewBox="0 0 12 12" fill="currentColor"><rect x="2.5" y="2.2" width="2.4" height="7.6" rx="0.6"/><rect x="7.1" y="2.2" width="2.4" height="7.6" rx="0.6"/></svg>',
+    close: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+    today: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3" width="13" height="12.5" rx="2.6"/><path d="M6 2v2M12 2v2M2.5 6.8h13"/></svg>',
+    wave: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 9v0M6.2 6.2v5.6M9 3.8v10.4M11.8 6.2v5.6M14.5 9v0"/></svg>',
+    spark: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.5l1.6 4.4L15 8.5l-4.4 1.6L9 14.5l-1.6-4.4L3 8.5l4.4-1.6L9 2.5z"/></svg>',
+    circle: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="9" cy="6.4" r="2.6"/><path d="M4.2 14.2c.9-2.2 2.6-3.3 4.8-3.3s3.9 1.1 4.8 3.3" stroke-linecap="round"/></svg>',
+    flow: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2.8" y="3" width="12.4" height="12" rx="2.4"/><path d="M6.2 9.2l2 2 3.8-4"/></svg>',
+    grid: '<svg width="16" height="16" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="2.8" y="2.8" width="5" height="5" rx="1.3"/><rect x="10.2" y="2.8" width="5" height="5" rx="1.3"/><rect x="2.8" y="10.2" width="5" height="5" rx="1.3"/><rect x="10.2" y="10.2" width="5" height="5" rx="1.3"/></svg>',
+    shield: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linejoin="round"><path d="M8 2L3 4v3.7c0 3.1 2.1 5.1 5 6.1 2.9-1 5-3 5-6.1V4L8 2z"/></svg>',
+    ext: '<svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5l5-5M4.5 3.5h4v4"/></svg>'
   };
 
   function playSwitchClick(isMute) {
@@ -56,7 +56,7 @@
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(isMute ? 300 : 460, now);
       osc.frequency.exponentialRampToValueAtTime(isMute ? 105 : 170, now + 0.025);
-      gain.gain.setValueAtTime(0.065, now);
+      gain.gain.setValueAtTime(0.06, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
@@ -77,50 +77,24 @@
     return memberById(state.currentEmployeeId) || state.members[0];
   }
 
-  function canBeCapturedByPeer(member) {
-    return Boolean(member && member.active && member.allowPeerCapture && member.tempPauseMinutes === 0);
-  }
-
   function finishLabel(f) {
     return { silver: t('finishSilver'), sky: t('finishSky'), starlight: t('finishStarlight'), midnight: t('finishMidnight') }[f] || f;
   }
 
-  function hwImageForState(mode) {
-    if (mode === 'input') return 'assets/switch-photo-input.webp';
-    if (mode === 'mute') return 'assets/switch-photo-mute.webp';
-    return 'assets/switch-photo-ready.webp';
-  }
-
-  function finishHeroImage(finish) {
+  function mountedPhoto(finish) {
     return {
-      silver: 'assets/hero-silver.webp',
-      sky: 'assets/hero-sky.webp',
-      starlight: 'assets/hero-starlight.webp',
-      midnight: 'assets/hero-midnight.webp'
-    }[finish] || 'assets/hero-silver.webp';
+      silver: 'assets/openside-silver.webp',
+      midnight: 'assets/openside-midnight.webp',
+      sky: 'assets/openside-sky.webp',
+      starlight: 'assets/openside-starlight.webp'
+    }[finish] || 'assets/openside-silver.webp';
   }
 
-  function renderMemberHardwareVisual(member, previewMode, switchId) {
-    if (member.finish === 'silver') {
-      return `
-        <div class="hw-render-wrap">
-          <img src="${hwImageForState(previewMode)}" alt="Silver Rutta Bar">
-          <span class="hw-led-overlay mode-${previewMode}" aria-hidden="true"></span>
-          <button type="button" class="hw-switch-area" id="${switchId}" aria-label="Physical mute switch"></button>
-        </div>
-      `;
-    }
-    const isMuted = previewMode === 'mute';
-    return `
-      <div class="hw-render-wrap is-finish-hero ${isMuted ? 'is-muted' : ''}">
-        <img src="${finishHeroImage(member.finish)}" alt="${finishLabel(member.finish)} Rutta Bar">
-      </div>
-      <div style="display:flex;justify-content:flex-end;margin-top:6px;">
-        <button type="button" class="btn btn-secondary btn-xs" id="${switchId}">
-          ${isMuted ? (state.lang === 'zh' ? '恢复物理开关' : 'Unmute switch') : (state.lang === 'zh' ? '拨动物理静音' : 'Engage physical mute')}
-        </button>
-      </div>
-    `;
+  function visibilityBadge(m) {
+    if (!m.active) return `<span class="pill-tag pill-neutral">${state.lang === 'zh' ? '已暂停' : 'Paused'}</span>`;
+    if (m.visibility === 'team') return `<span class="pill-tag pill-green">${state.lang === 'zh' ? '团队互通' : 'Team Bars'}</span>`;
+    if (m.visibility === 'pause30') return `<span class="pill-tag pill-amber">${state.lang === 'zh' ? '免打扰 30m' : 'Quiet 30m'}</span>`;
+    return `<span class="pill-tag pill-neutral">${ICONS.lock} ${state.lang === 'zh' ? '仅我的 Mac' : 'My Mac Only'}</span>`;
   }
 
   function renderAvatar(member, size = 'md') {
@@ -132,9 +106,7 @@
 
   function showToast(msg, actionLabel = null, onAction = null) {
     const stack = $('#toast-stack');
-    if (!actionLabel) {
-      $$('.toast:not(.has-action)', stack).forEach((old) => old.remove());
-    }
+    if (!actionLabel) $$('.toast:not(.has-action)', stack).forEach((old) => old.remove());
     const el = document.createElement('div');
     el.className = actionLabel ? 'toast has-action' : 'toast';
     el.innerHTML = `<span>${esc(msg)}</span>`;
@@ -150,19 +122,28 @@
       el.style.opacity = '0';
       el.style.transition = 'opacity 0.2s';
       setTimeout(() => el.remove(), 200);
-    }, actionLabel ? 4200 : 2400);
+    }, actionLabel ? 4000 : 2400);
   }
 
-  function switchRole(role, targetTab = null) {
+  function switchRole(role, tab = null) {
     stopQuotePlayback();
-    closeMemberDrawer();
     state.roleMode = role;
-    if (targetTab) {
-      state.activeTab = targetTab;
-    } else {
-      state.activeTab = role === 'employee' ? 'my-voice' : 'voiceprints';
-    }
+    state.activeTab = tab || (role === 'employee' ? 'today' : 'circle');
     state.decFilter = 'all';
+    renderAll();
+  }
+
+  function setEmployeeVisibility(member, vis, announce = true) {
+    member.visibility = vis;
+    if (vis === 'self' || vis === 'pause30') {
+      if (announce) {
+        showToast(vis === 'self'
+          ? (state.lang === 'zh' ? `${member.name.split(' ')[0]} 已设为「仅我的 Mac」：同事设备遇到你将不亮灯、0 留存` : `Set to My Mac Only — teammates’ Bars stay dark`)
+          : (state.lang === 'zh' ? `已开启 30 分钟免打扰：所有设备静默忽略你的声音` : `Quiet 30m active — all Bars ignore your voice`));
+      }
+    } else if (announce) {
+      showToast(state.lang === 'zh' ? `已设为「同团队成员」：小会可互通，经你确认后才共享` : `Set to Team Bars — huddle notes require your confirm`);
+    }
     renderAll();
   }
 
@@ -171,44 +152,50 @@
   }
 
   function adminDecisions() {
-    // Admins ONLY see confirmed/synced workspace records & Monday team follow-ups — NEVER private unconfirmed drafts
     return state.decisions.filter((d) => d.status !== 'pending');
   }
 
-  /* ---------- Chrome, Role Switcher, Sidebar & Menu Bar Sync ---------- */
+  /* =====================================================================
+   * MACOS CHROME, MENU BAR & VIBRANCY SIDEBAR SYNC
+   * ===================================================================== */
   function syncChrome() {
     document.documentElement.lang = state.lang === 'zh' ? 'zh-CN' : 'en';
     $('#macos-menubar').hidden = !state.showMenubar;
     $('#toggle-menubar').checked = state.showMenubar;
+    $('#toggle-zoom').checked = state.windowZoomed;
     document.body.classList.toggle('has-menubar', state.showMenubar);
     document.body.classList.toggle('clean-shot', state.cleanShot);
+    $('#desktop-stage').classList.toggle('is-zoomed', state.windowZoomed);
+    $('#osm-clock').textContent = state.lang === 'zh' ? '周四 14:22' : 'Thu 14:22';
 
     $$('[data-i18n]').forEach((el) => { el.textContent = t(el.getAttribute('data-i18n')); });
     $$('.lang-btn').forEach((b) => b.classList.toggle('is-active', b.dataset.lang === state.lang));
-    $$('.role-btn').forEach((b) => b.classList.toggle('is-active', b.dataset.role === state.roleMode));
+    $$('.mac-seg-btn').forEach((b) => b.classList.toggle('is-active', b.dataset.role === state.roleMode));
 
     const emp = currentEmployee();
+    const isMuted = emp.barState === 'muted';
+    const dotCls = isMuted ? 'dot-mute' : state.multiBarSync ? 'dot-input' : emp.visibility === 'pause30' ? 'dot-visitor' : 'dot-ready';
 
-    // Render Role Identity sub-block in Sidebar
-    const idBox = $('#role-identity');
+    // Sidebar Identity Block
+    const idEl = $('#sidebar-identity');
     if (state.roleMode === 'employee') {
       const maya = memberById('maya');
       const leo = memberById('leo');
-      idBox.innerHTML = `
-        <div class="emp-switcher">
-          <button type="button" class="emp-pill ${state.currentEmployeeId === 'maya' ? 'is-active' : ''}" data-pick-emp="maya">
+      idEl.innerHTML = `
+        <div class="person-switcher">
+          <button type="button" class="person-chip ${emp.id === 'maya' ? 'is-active' : ''}" data-pick-emp="maya">
             ${renderAvatar(maya, 'xs')}
             <span>Maya</span>
-            <span class="emp-pill-tag">A</span>
+            <span class="person-role-tag">A</span>
           </button>
-          <button type="button" class="emp-pill ${state.currentEmployeeId === 'leo' ? 'is-active' : ''}" data-pick-emp="leo">
+          <button type="button" class="person-chip ${emp.id === 'leo' ? 'is-active' : ''}" data-pick-emp="leo">
             ${renderAvatar(leo, 'xs')}
             <span>Leo</span>
-            <span class="emp-pill-tag">B</span>
+            <span class="person-role-tag">B</span>
           </button>
         </div>
       `;
-      $$('[data-pick-emp]', idBox).forEach((b) => {
+      $$('[data-pick-emp]', idEl).forEach((b) => {
         b.addEventListener('click', () => {
           stopQuotePlayback();
           state.currentEmployeeId = b.dataset.pickEmp;
@@ -216,215 +203,165 @@
         });
       });
     } else {
-      idBox.innerHTML = `
-        <div class="admin-scope-pill">
-          ${ICONS.shield}
-          <span>${state.lang === 'zh' ? '管理者视角 · 无权听原声' : 'Admin scope · Zero raw audio'}</span>
+      idEl.innerHTML = `
+        <div class="admin-identity-bar">
+          <strong>Northstar Studio</strong>
+          <span>${state.lang === 'zh' ? '脱敏管理' : 'Privacy-scoped'}</span>
         </div>
       `;
     }
 
-    // Render Role-Specific Navigation
+    // Sidebar Navigation
     const navEl = $('#rail-nav');
     if (state.roleMode === 'employee') {
       const myPending = employeeDecisions(emp.id).filter((d) => d.status === 'pending').length;
       navEl.innerHTML = `
-        <div class="rail-group-label">${t('groupMySpace')} · ${esc(emp.name.split(' ')[0])}</div>
-        <button type="button" class="rail-item ${state.activeTab === 'my-voice' ? 'is-active' : ''}" data-tab="my-voice" role="tab">
+        <div class="nav-section-label">${t('secPersonal')} · ${esc(emp.name.split(' ')[0])}</div>
+        <button type="button" class="nav-row ${state.activeTab === 'today' ? 'is-active' : ''}" data-tab="today" role="tab">
+          ${ICONS.today}
+          <span>${t('navToday')}</span>
+          ${myPending > 0 ? `<span class="nav-badge is-amber" id="nav-count-pending">${myPending}</span>` : ''}
+        </button>
+        <button type="button" class="nav-row ${state.activeTab === 'my-bar' ? 'is-active' : ''}" data-tab="my-bar" role="tab">
           ${ICONS.wave}
-          <span>${t('navMyVoice')}</span>
-          <span class="rail-count">${canBeCapturedByPeer(emp) ? (state.lang === 'zh' ? '可被录' : 'Open') : (state.lang === 'zh' ? '仅本机' : 'Self')}</span>
+          <span>${t('navMyBar')}</span>
+          <span class="nav-badge">${emp.visibility === 'team' ? (state.lang === 'zh' ? '互通' : 'Team') : emp.visibility === 'self' ? (state.lang === 'zh' ? '仅本机' : 'Self') : '30m'}</span>
         </button>
-        <button type="button" class="rail-item ${state.activeTab === 'my-decisions' ? 'is-active' : ''}" data-tab="my-decisions" role="tab">
-          ${ICONS.check}
-          <span>${t('navMyDecisions')}</span>
-          ${myPending > 0 ? `<span class="rail-count is-accent" id="nav-count-pending">${myPending}</span>` : ''}
-        </button>
-        <button type="button" class="rail-item ${state.activeTab === 'my-agent' ? 'is-active' : ''}" data-tab="my-agent" role="tab">
-          ${ICONS.nodes}
-          <span>${t('navMyAgent')}</span>
+        <button type="button" class="nav-row ${state.activeTab === 'ask-agent' ? 'is-active' : ''}" data-tab="ask-agent" role="tab">
+          ${ICONS.spark}
+          <span>${t('navAskAgent')}</span>
         </button>
       `;
     } else {
-      const syncedCount = adminDecisions().length;
+      const activeCount = state.members.filter((m) => m.active).length;
       navEl.innerHTML = `
-        <div class="rail-group-label">${t('groupAdminCore')}</div>
-        <button type="button" class="rail-item ${state.activeTab === 'voiceprints' ? 'is-active' : ''}" data-tab="voiceprints" role="tab">
-          ${ICONS.wave}
-          <span>${t('navVoiceprints')}</span>
-          <span class="rail-count" id="nav-count-vp">${state.members.length}</span>
+        <div class="nav-section-label">${t('secWorkspace')}</div>
+        <button type="button" class="nav-row ${state.activeTab === 'circle' ? 'is-active' : ''}" data-tab="circle" role="tab">
+          ${ICONS.circle}
+          <span>${t('navCircle')}</span>
+          <span class="nav-badge" id="nav-count-vp">${activeCount}/${state.members.length}</span>
         </button>
-        <button type="button" class="rail-item ${state.activeTab === 'decisions' ? 'is-active' : ''}" data-tab="decisions" role="tab">
-          ${ICONS.check}
-          <span>${t('navAdminDecisions')}</span>
-          <span class="rail-count" id="nav-count-admin-dec">${syncedCount}</span>
+        <button type="button" class="nav-row ${state.activeTab === 'team-flow' ? 'is-active' : ''}" data-tab="team-flow" role="tab">
+          ${ICONS.flow}
+          <span>${t('navTeamFlow')}</span>
+          <span class="nav-badge" id="nav-count-admin-dec">${adminDecisions().length}</span>
         </button>
-
-        <div class="rail-group-label">${t('groupAdminSystem')}</div>
-        <button type="button" class="rail-item ${state.activeTab === 'devices' ? 'is-active' : ''}" data-tab="devices" role="tab">
-          ${ICONS.bar}
-          <span>${t('navDevices')}</span>
-          <span class="rail-count">4</span>
-        </button>
-        <button type="button" class="rail-item ${state.activeTab === 'integrations' ? 'is-active' : ''}" data-tab="integrations" role="tab">
-          ${ICONS.nodes}
-          <span>${t('navIntegrations')}</span>
+        <button type="button" class="nav-row ${state.activeTab === 'connections' ? 'is-active' : ''}" data-tab="connections" role="tab">
+          ${ICONS.grid}
+          <span>${t('navConnections')}</span>
         </button>
       `;
     }
 
-    $$('.rail-item', navEl).forEach((b) => {
+    $$('.nav-row', navEl).forEach((b) => {
       b.addEventListener('click', () => {
         stopQuotePlayback();
-        closeMemberDrawer();
         state.activeTab = b.dataset.tab;
         renderAll();
       });
     });
 
-    // Topbar Title & Contextual Action
-    const headerMap = {
-      'my-voice': [t('titleMyVoice'), t('subMyVoice')],
-      'my-decisions': [t('titleMyDecisions'), t('subMyDecisions')],
-      'my-agent': [t('titleMyAgent'), t('subMyAgent')],
-      voiceprints: [t('titleVoiceprints'), t('subVoiceprints')],
-      decisions: [t('titleAdminDecisions'), t('subAdminDecisions')],
-      devices: [t('titleDevices'), t('subDevices')],
-      integrations: [t('titleIntegrations'), t('subIntegrations')]
+    // Unified Toolbar Title & Right Action
+    const titleMap = {
+      today: [t('titleToday'), t('subToday')],
+      'my-bar': [t('titleMyBar'), t('subMyBar')],
+      'ask-agent': [t('titleAskAgent'), t('subAskAgent')],
+      circle: [t('titleCircle'), t('subCircle')],
+      'team-flow': [t('titleTeamFlow'), t('subTeamFlow')],
+      connections: [t('titleConnections'), t('subConnections')]
     };
-    const [hTitle, hSub] = headerMap[state.activeTab] || ['', ''];
-    $('#topbar-title').textContent = hTitle;
-    $('#topbar-subtitle').textContent = hSub;
+    const [tTitle, tSub] = titleMap[state.activeTab] || ['', ''];
+    $('#topbar-title').textContent = tTitle;
+    $('#topbar-subtitle').textContent = tSub;
 
-    const actionsEl = $('#topbar-actions');
-    if (state.roleMode === 'employee' && state.activeTab === 'my-voice') {
-      const paused = emp.tempPauseMinutes > 0;
-      actionsEl.innerHTML = `
-        <button type="button" class="btn ${paused ? 'btn-amber-soft' : 'btn-secondary'}" id="top-temp-pause">
-          ${ICONS.clock}
-          <span>${paused ? t('empQuickPauseActive') : t('empQuickPause')}</span>
-        </button>
+    const actEl = $('#topbar-actions');
+    if (state.roleMode === 'admin' && state.activeTab === 'circle') {
+      actEl.innerHTML = `<button type="button" class="mac-btn mac-btn-primary" id="top-add-member">${ICONS.plus}<span>${t('btnInviteVoice')}</span></button>`;
+      $('#top-add-member', actEl).addEventListener('click', () => openEnrollModal(null));
+    } else if (state.roleMode === 'admin' && state.activeTab === 'connections') {
+      actEl.innerHTML = `
+        <button type="button" class="mac-btn mac-btn-subtle" id="top-visitor-btn">${state.lang === 'zh' ? '模拟外部访客说话' : 'Simulate visitor'}</button>
+        <button type="button" class="mac-btn ${state.multiBarSync ? 'mac-btn-primary' : 'mac-btn-subtle'}" id="top-sync-btn">${state.multiBarSync ? (state.lang === 'zh' ? '结束三机同频' : 'Stop 3-Mac sync') : (state.lang === 'zh' ? '演示三台 Mac 同频去重' : '3-Mac sync demo')}</button>
       `;
-      $('#top-temp-pause', actionsEl).addEventListener('click', () => {
-        emp.tempPauseMinutes = emp.tempPauseMinutes > 0 ? 0 : 30;
-        showToast(emp.tempPauseMinutes > 0
-          ? (state.lang === 'zh' ? `已开启 30 分钟免被同事收录（不影响本机）` : `Paused peer capture for 30m`)
-          : (state.lang === 'zh' ? `已恢复跨设备收录设置` : `Resumed peer capture setting`));
+      $('#top-visitor-btn', actEl).addEventListener('click', () => {
+        state.blockedToday += 1;
+        state.visitorGateDemo = true;
         renderAll();
+        showPrivacyBanner('visitor');
       });
-    } else if (state.roleMode === 'admin' && state.activeTab === 'voiceprints') {
-      actionsEl.innerHTML = `<button type="button" class="btn btn-primary" id="top-add-member">${ICONS.plus}<span>${t('btnAddMember')}</span></button>`;
-      $('#top-add-member', actionsEl).addEventListener('click', () => openEnrollModal(null));
-    } else if (state.roleMode === 'admin' && state.activeTab === 'devices') {
-      actionsEl.innerHTML = `<button type="button" class="btn ${state.multiBarSync ? 'btn-primary' : 'btn-secondary'}" id="top-sync-btn">${state.multiBarSync ? t('syncBtnStop') : t('syncBtnStart')}</button>`;
-      $('#top-sync-btn', actionsEl).addEventListener('click', () => {
+      $('#top-sync-btn', actEl).addEventListener('click', () => {
         state.multiBarSync = !state.multiBarSync;
-        state.hwState = state.multiBarSync ? 'input' : 'ready';
+        state.visitorGateDemo = false;
         renderAll();
       });
     } else {
-      actionsEl.innerHTML = '';
+      actEl.innerHTML = '';
     }
 
-    // Sidebar Bottom Hardware Card & macOS Menu Bar Sync
-    const localBarMode = state.roleMode === 'employee'
-      ? (emp.barState === 'muted' ? 'mute' : state.hwState)
-      : state.hwState;
+    // Sidebar Bottom Hardware Strip & Top Menu Bar
+    const statusLabel = isMuted
+      ? (state.lang === 'zh' ? '物理静音中' : 'Muted')
+      : emp.visibility === 'pause30'
+        ? (state.lang === 'zh' ? '免打扰 30m' : 'Quiet 30m')
+        : state.multiBarSync
+          ? (state.lang === 'zh' ? '同频拾音中' : 'Synced')
+          : (state.lang === 'zh' ? '待机呼吸绿灯' : 'Ready');
 
-    const stateLabels = {
-      ready: state.lang === 'zh' ? '待机绿灯' : 'Ready',
-      input: state.lang === 'zh' ? '识别拾音中' : 'Capturing',
-      visitor: state.lang === 'zh' ? '已忽略未授权' : 'Ignored',
-      mute: state.lang === 'zh' ? '物理静音' : 'Muted'
-    };
+    $('#sidebar-hw-img').src = mountedPhoto(emp.finish);
+    $('#sidebar-led-dot').className = `dot ${dotCls}`;
+    $('#sidebar-hw-label').textContent = `${emp.name.split(' ')[0]} · ${finishLabel(emp.finish)} Bar`;
+    $('#sidebar-hw-sub').textContent = `${statusLabel} · ${emp.visibility === 'team' ? t('visTeamShort') : emp.visibility === 'self' ? t('visSelfShort') : t('visPauseShort')}`;
 
-    $('#sidebar-led-dot').className = `dot dot-${localBarMode}`;
-    if (state.roleMode === 'employee') {
-      $('#sidebar-hw-label').textContent = `${emp.name.split(' ')[0]} · ${finishLabel(emp.finish)} Bar`;
-      $('#sidebar-hw-sub').textContent = emp.tempPauseMinutes > 0
-        ? (state.lang === 'zh' ? '30 分钟免被同事收录中' : 'Peer capture paused 30m')
-        : `${stateLabels[localBarMode]} · ${canBeCapturedByPeer(emp) ? (state.lang === 'zh' ? '允许他人收录' : 'Peers allowed') : (state.lang === 'zh' ? '仅本机收录' : 'Self only')}`;
-    } else {
-      const activeCount = state.members.filter((m) => m.active).length;
-      $('#sidebar-hw-label').textContent = state.lang === 'zh' ? `${activeCount} 位声纹 · 4 台 Bar` : `${activeCount} active · 4 Bars`;
-      $('#sidebar-hw-sub').textContent = stateLabels[localBarMode];
-    }
-
-    // Top macOS Menu Bar
-    $('#mb-status-dot').className = `dot dot-${localBarMode}`;
-    $('#mb-status-label').textContent = emp.tempPauseMinutes > 0
-      ? (state.lang === 'zh' ? '免收录 30m' : 'Paused 30m')
-      : stateLabels[localBarMode];
+    $('#mb-status-dot').className = `dot ${dotCls}`;
+    $('#mb-status-label').textContent = statusLabel;
+    $('#mbp-thumb').src = mountedPhoto(emp.finish);
     $('#mbp-title').textContent = `Rutta Bar · ${finishLabel(emp.finish)}`;
-    $('#mbp-sub').textContent = state.lang === 'zh'
-      ? `${emp.name} 的 MacBook Air · USB-C`
-      : `${emp.name}’s MacBook Air · USB-C`;
-    $('#mbp-pill').textContent = stateLabels[localBarMode];
-    $('#mbp-pill').className = `badge ${localBarMode === 'mute' ? 'badge-orange' : localBarMode === 'input' ? 'badge-amber' : localBarMode === 'visitor' ? 'badge-neutral' : 'badge-green'}`;
-    $('#mbp-bar-img').src = emp.finish === 'silver' ? hwImageForState(localBarMode) : finishHeroImage(emp.finish);
-    $('#mbp-bar-img').style.maxHeight = emp.finish === 'silver' ? '' : '54px';
-    $('#mbp-bar-img').style.objectFit = 'contain';
-    $('#mbp-toggle-peer').setAttribute('aria-checked', String(emp.allowPeerCapture));
+    $('#mbp-sub').textContent = `${emp.name} · MacBook Air`;
+    $('#mbp-pill').textContent = statusLabel;
+    $('#mbp-pill').className = `pill-tag ${isMuted ? 'pill-orange' : emp.visibility === 'pause30' ? 'pill-amber' : 'pill-green'}`;
+    $$('#mbp-vis-grid .osmp-vis-btn').forEach((b) => {
+      b.classList.toggle('is-active', b.dataset.setVis === emp.visibility);
+    });
   }
 
-  function setHardwareState(mode) {
-    const wasMute = state.hwState === 'mute';
-    if (mode === 'mute' || (wasMute && mode !== 'mute')) playSwitchClick(mode === 'mute');
-    state.hwState = mode;
-    if (mode === 'visitor') state.blockedVisitorsToday += 1;
-    syncChrome();
-    if (state.activeTab === 'devices' || state.activeTab === 'my-voice') renderCurrentView();
-    if (state.inspectedMemberId) renderMemberDrawer(state.inspectedMemberId);
-  }
-
-  /* ---------- Floating macOS Notification Card ---------- */
-  function showDecisionNotice(decisionId) {
-    const dec = state.decisions.find((d) => d.id === decisionId) || state.decisions[0];
+  /* =====================================================================
+   * MACOS TOP-RIGHT FLOATING NOTIFICATION BANNERS
+   * ===================================================================== */
+  function showDecisionBanner(decId) {
+    const dec = state.decisions.find((d) => d.id === decId) || state.decisions[0];
     if (!dec) return;
-    const owner = memberById(dec.ownerId);
     const capturer = memberById(dec.capturedById);
     const allDone = dec.participants.every((p) => p.confirmed);
-    const names = dec.participants.map((p) => memberById(p.memberId)?.name.split(' ')[0] || '').join(' & ');
-
     const fc = $('#floating-card');
     fc.hidden = false;
     fc.innerHTML = `
-      <div class="fn-head">
-        <span class="fn-brand"><img src="assets/monogram.svg" alt="" width="10" height="13"><span>${t('fnDecision')}</span></span>
-        <button type="button" class="icon-btn" id="fc-close-btn" aria-label="Close">${ICONS.close}</button>
+      <div class="mn-top">
+        <span class="mn-app"><img src="assets/monogram.svg" alt="" width="10" height="13"><span>Rutta · ${state.lang === 'zh' ? '刚刚捕捉的口头承诺' : 'Spoken commitment'}</span></span>
+        <button type="button" class="icon-close" id="fc-close-btn" aria-label="Close">${ICONS.close}</button>
       </div>
-      <div class="fn-title">${esc(pick(dec.title))}</div>
-      <div class="fn-desc">
-        ${owner ? esc(owner.name) : t('unassigned')} · ${esc(pick(dec.due))}<br>
-        ${capturer ? (state.lang === 'zh' ? `由 ${capturer.name.split(' ')[0]} 的 Rutta Bar 收录 · ` : `Via ${capturer.name.split(' ')[0]}’s Bar · `) : ''}
+      <div class="mn-title">${esc(pick(dec.title))}</div>
+      <div class="mn-desc">
+        ${capturer ? (state.lang === 'zh' ? `来自 ${capturer.name.split(' ')[0]} 的${finishLabel(capturer.finish)} Bar · ` : `Via ${capturer.name.split(' ')[0]}’s Bar · `) : ''}
         ${allDone
-          ? (state.lang === 'zh' ? '已同步至 Linear / Notion / Slack。' : 'Synced to Linear, Notion & Slack.')
-          : (state.lang === 'zh' ? `仅 ${names} 可见，确认后同步。` : `Private to ${names} until confirmed.`)}
+          ? (state.lang === 'zh' ? '双方已确认，已同步至 Linear / Notion / Slack。' : 'Confirmed & synced to Linear, Notion, and Slack.')
+          : (state.lang === 'zh' ? '未确认前仅你们 2 人可见，管理者不可访问。' : 'Private to participants until confirmed.')}
       </div>
-      <div class="fn-foot">
-        <div class="confirm-list">
+      <div class="mn-foot">
+        <div class="confirm-pills">
           ${dec.participants.map((p) => {
             const m = memberById(p.memberId);
             const first = m ? m.name.split(' ')[0] : '?';
             return `
-              <button type="button" class="confirm-chip ${p.confirmed ? 'is-confirmed' : ''}" data-fc-confirm="${dec.id}:${p.memberId}">
-                ${renderAvatar(m, 'sm')}
-                <span>${esc(first)} ${p.confirmed ? '✓' : t('confirmAction')}</span>
+              <button type="button" class="confirm-pill ${p.confirmed ? 'is-done' : ''}" data-fc-confirm="${dec.id}:${p.memberId}">
+                ${renderAvatar(m, 'xs')}
+                <span>${esc(first)} ${p.confirmed ? '✓' : (state.lang === 'zh' ? '确认' : 'Confirm')}</span>
               </button>
             `;
           }).join('')}
         </div>
-        <button type="button" class="btn btn-ghost btn-xs" id="fc-open">${t('fnOpen')}</button>
       </div>
     `;
     $('#fc-close-btn', fc).addEventListener('click', () => { fc.hidden = true; });
-    $('#fc-open', fc).addEventListener('click', () => {
-      fc.hidden = true;
-      state.roleMode = 'employee';
-      state.activeTab = 'my-decisions';
-      state.selectedDecisionId = dec.id;
-      renderAll();
-    });
     $$('[data-fc-confirm]', fc).forEach((b) => {
       b.addEventListener('click', () => {
         const [did, mid] = b.dataset.fcConfirm.split(':');
@@ -433,457 +370,261 @@
     });
   }
 
-  function showPrivacyNotice(isPeerBlock = false) {
+  function showPrivacyBanner(kind = 'peer') {
     const fc = $('#floating-card');
     fc.hidden = false;
+    const isPeer = kind === 'peer';
     fc.innerHTML = `
-      <div class="fn-head">
-        <span class="fn-brand"><img src="assets/monogram.svg" alt="" width="10" height="13"><span>${t('fnVisitor')}</span></span>
-        <button type="button" class="icon-btn" id="fc-close-btn" aria-label="Close">${ICONS.close}</button>
+      <div class="mn-top">
+        <span class="mn-app"><img src="assets/monogram.svg" alt="" width="10" height="13"><span>Rutta · ${state.lang === 'zh' ? '声纹隐私门禁' : 'Voiceprint Gate'}</span></span>
+        <button type="button" class="icon-close" id="fc-close-btn" aria-label="Close">${ICONS.close}</button>
       </div>
-      <div class="fn-title">${isPeerBlock ? t('fnPeerTitle') : t('fnVisitorTitle')}</div>
-      <div class="fn-desc">${isPeerBlock ? t('fnPeerDesc') : t('fnVisitorDesc')}</div>
+      <div class="mn-title">${isPeer
+        ? (state.lang === 'zh' ? '小会防收录生效 · 已忽略 Leo 的发言' : 'Leo’s speech ignored on teammate’s Bar')
+        : (state.lang === 'zh' ? '1 位外部访客开口 · 顶灯未亮、0 留存' : '1 visitor spoke · LED stayed dark, 0 saved')}</div>
+      <div class="mn-desc">${isPeer
+        ? (state.lang === 'zh' ? 'Leo 将可见性设为了「仅我的 Mac」：Maya 的 Rutta Bar 遇到 Leo 声音时保持熄灯并实时丢弃，仅收录 Maya 本人。' : 'Leo set visibility to My Mac Only. Maya’s Bar drops Leo’s voice immediately without lighting up.')
+        : (state.lang === 'zh' ? '未匹配到北极星团队白名单声纹，硬件顶灯保持熄灭，音频片段已在内存端实时丢弃。' : 'Voice did not match Northstar’s circle. Top LED stayed off and audio was discarded.')}</div>
     `;
     $('#fc-close-btn', fc).addEventListener('click', () => { fc.hidden = true; });
   }
 
   /* =====================================================================
-   * EMPLOYEE VIEWS (Personal macOS App Experience)
+   * EMPLOYEE VIEW 1: TODAY'S MEMORY STREAM + AIRDROP VISIBILITY BAR
    * ===================================================================== */
-  function renderEmployeeVoiceView() {
+  function renderEmployeeTodayView() {
     const emp = currentEmployee();
-    const maya = memberById('maya');
-    const leo = memberById('leo');
-    const otherId = emp.id === 'leo' ? 'maya' : 'leo';
-    const isMuted = emp.barState === 'muted';
-    const previewMode = isMuted ? 'mute' : 'ready';
-    const leoAllowedOnMaya = canBeCapturedByPeer(leo);
-
-    return `
-      ${emp.tempPauseMinutes > 0 ? `
-        <div class="temp-pause-banner">
-          <span>${state.lang === 'zh'
-            ? `临时私密模式生效中（剩余 ${emp.tempPauseMinutes} 分钟）：在此期间同事的 Rutta Bar 将完全忽略你的声音，不亮灯也不留存。`
-            : `Temporary privacy pause active (${emp.tempPauseMinutes}m left): teammates’ Bars will ignore your speech with zero storage.`}</span>
-          <button type="button" class="btn btn-secondary btn-xs" id="btn-end-pause">${state.lang === 'zh' ? '立即恢复' : 'Resume now'}</button>
-        </div>
-      ` : ''}
-
-      <section class="emp-top-grid">
-        <div class="panel emp-bar-card">
-          <div class="card-head-row">
-            <div>
-              <h2>${t('empBarCardTitle')} · ${finishLabel(emp.finish)}</h2>
-              <p>${t('empBarCardSub')}</p>
-            </div>
-            <span class="badge ${isMuted ? 'badge-orange' : 'badge-green'}">${isMuted ? t('diagMute') : t('diagReady')}</span>
-          </div>
-
-          <div class="hw-studio-box">
-            <div class="hw-studio-head">
-              <span style="display:inline-flex;align-items:center;gap:6px;">
-                <span class="dot ${isMuted ? 'dot-mute' : 'dot-ready'}"></span>
-                <span>${esc(emp.name)} · MacBook Air</span>
-              </span>
-              <span style="color:var(--muted);">${emp.lidStandby ? (state.lang === 'zh' ? '合盖待机已开' : 'Lid standby ON') : (state.lang === 'zh' ? '仅开盖在线' : 'Lid open only')}</span>
-            </div>
-            ${renderMemberHardwareVisual(emp, previewMode, 'emp-hw-switch')}
-          </div>
-
-          <div class="drawer-kv-list">
-            <div class="drawer-kv-row">
-              <span>${state.lang === 'zh' ? '物理静音挡位' : 'Physical mute switch'}</span>
-              <span>${isMuted ? (state.lang === 'zh' ? '已拨下 · 硬件断麦' : 'Engaged · Mic cut') : (state.lang === 'zh' ? '开启 · 正常待机' : 'Open · Ready')}</span>
-            </div>
-            <div class="drawer-kv-row">
-              <span>${state.lang === 'zh' ? '当前跨设备状态' : 'Peer-capture status'}</span>
-              <span>${canBeCapturedByPeer(emp) ? (state.lang === 'zh' ? '小会可被同事设备收录' : 'Teammates’ Bars allowed') : (state.lang === 'zh' ? '仅限我本机设备' : 'Own Bar only')}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="panel emp-consent-card">
-          <div class="card-head-row">
-            <div>
-              <h2>${t('empConsentTitle')}</h2>
-              <p>${t('empConsentSub')}</p>
-            </div>
-            <span class="badge badge-neutral">${ICONS.lock} ${state.lang === 'zh' ? '仅本人可改' : 'Self only'}</span>
-          </div>
-
-          <div class="consent-list">
-            <div class="consent-item">
-              <div>
-                <div class="ci-title">${t('consentMasterTitle')}</div>
-                <p class="ci-desc">${t('consentMasterDesc')}</p>
-              </div>
-              <button type="button" class="toggle" role="switch" aria-checked="${emp.active}" id="emp-toggle-master"></button>
-            </div>
-
-            <div class="consent-item is-featured">
-              <div>
-                <div class="ci-title">
-                  <span>${t('consentPeerTitle')}</span>
-                  <span class="badge ${canBeCapturedByPeer(emp) ? 'badge-green' : 'badge-neutral'}">${canBeCapturedByPeer(emp) ? t('peerAllowed') : t('peerSelfOnly')}</span>
-                </div>
-                <p class="ci-desc">${t('consentPeerDesc')}</p>
-              </div>
-              <button type="button" class="toggle" role="switch" aria-checked="${emp.allowPeerCapture}" ${emp.active ? '' : 'disabled'} id="emp-toggle-peer"></button>
-            </div>
-
-            <div class="consent-item">
-              <div>
-                <div class="ci-title">${t('consentConfirmTitle')}</div>
-                <p class="ci-desc">${t('consentConfirmDesc')}</p>
-              </div>
-              <button type="button" class="toggle" role="switch" aria-checked="${emp.requireMyConfirm}" id="emp-toggle-confirm"></button>
-            </div>
-
-            <div class="consent-item">
-              <div>
-                <div class="ci-title">${t('consentLidTitle')}</div>
-                <p class="ci-desc">${t('consentLidDesc')}</p>
-              </div>
-              <button type="button" class="toggle" role="switch" aria-checked="${emp.lidStandby}" id="emp-toggle-lid"></button>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Live A & B Small-Meeting Peer Capture Check -->
-      <section class="panel huddle-panel">
-        <div class="card-head-row">
-          <div>
-            <h2>${t('huddleTitle')}</h2>
-            <p>${t('huddleSub')}</p>
-          </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="btn btn-secondary btn-xs" id="btn-test-huddle-pop">
-              ${state.lang === 'zh' ? '模拟开小会效果' : 'Simulate huddle'}
-            </button>
-            <button type="button" class="btn btn-ghost btn-xs" id="btn-switch-ab">
-              ${t('huddleSwitchPerson')} (${otherId === 'maya' ? 'Maya A' : 'Leo B'}) →
-            </button>
-          </div>
-        </div>
-
-        <div class="huddle-flow">
-          <div class="huddle-node">
-            <div class="hn-head">
-              <div class="user-cell">
-                ${renderAvatar(maya, 'sm')}
-                <div>
-                  <div class="u-name" style="font-size:13px;">Maya Lin (A)</div>
-                  <div class="u-meta" style="font-size:11.5px;">${state.lang === 'zh' ? '持有银色 Rutta Bar' : 'Silver Rutta Bar on desk'}</div>
-                </div>
-              </div>
-              <span class="badge ${leoAllowedOnMaya ? 'badge-amber' : 'badge-green'}">
-                <span class="dot ${leoAllowedOnMaya ? 'dot-input' : 'dot-ready'}"></span>
-                ${leoAllowedOnMaya ? (state.lang === 'zh' ? '收录 A & B' : 'Captures A & B') : (state.lang === 'zh' ? '仅收录 A' : 'A only')}
-              </span>
-            </div>
-            <div class="hn-result">
-              ${leoAllowedOnMaya
-                ? (state.lang === 'zh' ? 'Maya 的 Rutta Bar 识别到 Leo 已开启跨设备收录，黄灯常亮并合并整理双方发言。' : 'Maya’s Bar recognizes Leo’s opted-in voiceprint, lights amber, and drafts a shared note.')
-                : (state.lang === 'zh' ? 'Maya 的 Rutta Bar 仅识别 Maya 本人发言；遇到 Leo 发言时立即跳过。' : 'Maya’s Bar captures Maya only and skips Leo’s voice completely.')}
-            </div>
-          </div>
-
-          <div class="huddle-arrow" aria-hidden="true">
-            ${ICONS.arrowRight}
-            <span>${leoAllowedOnMaya ? (state.lang === 'zh' ? '已授权' : 'Allowed') : (state.lang === 'zh' ? '已拒收' : 'Blocked')}</span>
-          </div>
-
-          <div class="huddle-node ${leoAllowedOnMaya ? 'is-allowed' : 'is-blocked'}">
-            <div class="hn-head">
-              <div class="user-cell">
-                ${renderAvatar(leo, 'sm')}
-                <div>
-                  <div class="u-name" style="font-size:13px;">Leo Park (B)</div>
-                  <div class="u-meta" style="font-size:11.5px;">${leo.tempPauseMinutes > 0 ? (state.lang === 'zh' ? '临时免收录 30 分钟中' : 'Paused 30m') : (leo.allowPeerCapture ? (state.lang === 'zh' ? '允许被同事设备收录' : 'Peer capture ON') : (state.lang === 'zh' ? '已关闭“允许被同事设备收录”' : 'Peer capture OFF'))}</div>
-                </div>
-              </div>
-              <span class="badge ${leoAllowedOnMaya ? 'badge-green' : 'badge-neutral'}">
-                ${leoAllowedOnMaya ? (state.lang === 'zh' ? '同步推送给 B 确认' : 'Sent to B to confirm') : (state.lang === 'zh' ? '不亮灯 · 0 留存' : 'LED dark · 0 saved')}
-              </span>
-            </div>
-            <div class="hn-result">
-              ${leoAllowedOnMaya
-                ? (state.lang === 'zh' ? '<strong>知情与确认权：</strong>生成的记录会立即推送到 Leo 的 Rutta App（标明「由 Maya 的设备收录」），Leo 可点确认或单方面销毁原话。' : '<strong>Full transparency:</strong> Leo immediately receives the draft labeled "Captured via Maya’s Bar" and can confirm or destroy it.')
-                : (state.lang === 'zh' ? '<strong>零留存保护：</strong>即便 Leo 在团队白名单中，Maya 的设备遇到 Leo 声音时也会视同访客实时丢弃，不亮灯、不转写、不生成记录。' : '<strong>Zero storage:</strong> Even though Leo is in the team roster, Maya’s Bar drops his speech like a visitor—LED dark, zero transcript.')}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Bottom Personal Voiceprint Management Strip -->
-      <section class="panel vp-self-strip">
-        <div class="vss-left">
-          <div class="vp-cell">
-            <div class="mini-wave">${emp.bars.map((h) => `<span style="height:${Math.round(h * 0.19)}px"></span>`).join('')}</div>
-            <span class="badge ${emp.active ? 'badge-green' : 'badge-neutral'}">${emp.active ? t('statusActive') : t('statusPaused')}</span>
-          </div>
-          <span style="font-size:12.5px;color:var(--muted);">
-            ${t('colLastHeard')}：${esc(pick(emp.lastHeard))} · ${state.lang === 'zh' ? '原声仅限本人在场回放，确认后 7 天自动销毁' : 'Clips accessible to participants only, auto-deleted after 7d'}
-          </span>
-        </div>
-        <div class="vss-actions">
-          <button type="button" class="btn btn-secondary btn-xs" id="emp-verify-vp">${t('drawerVerifyBtn')}</button>
-          <button type="button" class="btn btn-secondary btn-xs" id="emp-reenroll-vp">${t('drawerReenroll')}</button>
-        </div>
-      </section>
-    `;
-  }
-
-  function bindEmployeeVoiceEvents(root) {
-    const emp = currentEmployee();
-    $('#btn-end-pause', root)?.addEventListener('click', () => {
-      emp.tempPauseMinutes = 0;
-      renderAll();
-    });
-    $('#emp-hw-switch', root)?.addEventListener('click', () => {
-      emp.barState = emp.barState === 'muted' ? 'online' : 'muted';
-      playSwitchClick(emp.barState === 'muted');
-      if (emp.id === 'maya') state.hwState = emp.barState === 'muted' ? 'mute' : 'ready';
-      renderAll();
-    });
-    $('#emp-toggle-master', root)?.addEventListener('click', () => {
-      emp.active = !emp.active;
-      showToast(emp.active
-        ? (state.lang === 'zh' ? '已启用你的团队声纹识别' : 'Voiceprint recognition enabled')
-        : (state.lang === 'zh' ? '已暂停声纹：所有设备均不再识别你' : 'Voiceprint paused across all Bars'));
-      renderAll();
-    });
-    $('#emp-toggle-peer', root)?.addEventListener('click', () => {
-      if (!emp.active) return;
-      emp.allowPeerCapture = !emp.allowPeerCapture;
-      showToast(emp.allowPeerCapture
-        ? (state.lang === 'zh' ? '已开启：开小会时允许同事设备收录并推送给你确认' : 'Peer capture enabled — drafts will be sent to you')
-        : (state.lang === 'zh' ? '已关闭：同事设备遇到你的声音将不亮灯、不留存' : 'Peer capture disabled — teammates’ Bars will ignore you'));
-      renderAll();
-    });
-    $('#emp-toggle-confirm', root)?.addEventListener('click', () => {
-      emp.requireMyConfirm = !emp.requireMyConfirm;
-      renderAll();
-    });
-    $('#emp-toggle-lid', root)?.addEventListener('click', () => {
-      emp.lidStandby = !emp.lidStandby;
-      renderAll();
-    });
-    $('#btn-switch-ab', root)?.addEventListener('click', () => {
-      state.currentEmployeeId = emp.id === 'leo' ? 'maya' : 'leo';
-      renderAll();
-    });
-    $('#btn-test-huddle-pop', root)?.addEventListener('click', () => {
-      const leo = memberById('leo');
-      if (canBeCapturedByPeer(leo)) {
-        showDecisionNotice('dec-launch');
-      } else {
-        state.blockedVisitorsToday += 1;
-        showPrivacyNotice(true);
-      }
-    });
-    $('#emp-verify-vp', root)?.addEventListener('click', () => {
-      emp.lastHeard = { zh: '刚刚验证通过', en: 'Verified just now' };
-      showToast(state.lang === 'zh' ? `声纹识别正常 · 已匹配 ${emp.name}` : `Voiceprint matched ${emp.name}`);
-      renderAll();
-    });
-    $('#emp-reenroll-vp', root)?.addEventListener('click', () => openEnrollModal(emp.id));
-  }
-
-  /* =====================================================================
-   * SHARED DECISIONS VIEW (Strict Employee vs Admin Privacy Boundary)
-   * ===================================================================== */
-  function renderDecisionsView(isAdmin) {
-    const emp = currentEmployee();
-    const baseList = isAdmin ? adminDecisions() : employeeDecisions(emp.id);
-    const pendingCount = baseList.filter((d) => d.status === 'pending').length;
-    const mondayCount = baseList.filter((d) => d.status === 'monday').length;
-    const list = baseList.filter((d) => state.decFilter === 'all' || d.status === state.decFilter);
-
+    const allMine = employeeDecisions(emp.id);
+    const pendingCnt = allMine.filter((d) => d.status === 'pending').length;
+    const list = allMine.filter((d) => state.decFilter === 'all' || d.status === state.decFilter);
     let selected = list.find((d) => d.id === state.selectedDecisionId) || list[0] || null;
     if (selected) state.selectedDecisionId = selected.id;
 
-    const statusBadge = (st) => {
-      if (st === 'synced') return `<span class="badge badge-green">${t('badgeSynced')}</span>`;
-      if (st === 'monday') return `<span class="badge badge-neutral">${t('badgeMonday')}</span>`;
-      return `<span class="badge badge-amber">${t('badgePending')}</span>`;
-    };
-
-    const hiddenDraftsCount = state.decisions.filter((d) => d.status === 'pending').length;
+    const visExplain = emp.visibility === 'team'
+      ? (state.lang === 'zh' ? '小会时同事的 Bar 可识别我，草稿经我确认后才共享' : 'Teammates’ Bars can include you in huddles (requires your confirm)')
+      : emp.visibility === 'self'
+        ? (state.lang === 'zh' ? '小会时同事的 Bar 遇到我不亮灯、0 留存（仅本机可记我）' : 'Teammates’ Bars stay dark & drop your voice (My Mac Only)')
+        : (state.lang === 'zh' ? '免打扰生效中：所有 Rutta Bar 静默忽略我的声音' : 'Quiet 30m active: all Bars ignore your voice');
 
     return `
-      ${isAdmin ? `
-        <div class="scope-banner">
-          <div class="scope-banner-left">
-            ${ICONS.lock}
-            <span>${state.lang === 'zh'
-              ? `管理者权限隔离生效中：当前有 ${hiddenDraftsCount} 条未确认私密讨论已自动隐藏，所有原始音频回放均不可访问。`
-              : `Admin privacy isolation active: ${hiddenDraftsCount} unconfirmed private drafts are hidden and all original voice clips are locked.`}</span>
+      <!-- Compact Ambient Hardware & AirDrop-style Voice Visibility Strip -->
+      <section class="ambient-strip">
+        <div class="as-device">
+          <img class="as-photo" src="${mountedPhoto(emp.finish)}" alt="">
+          <div>
+            <div class="as-title">
+              <span class="dot ${emp.barState === 'muted' ? 'dot-mute' : 'dot-ready'}"></span>
+              <span>${esc(emp.name)} · ${finishLabel(emp.finish)} Rutta Bar</span>
+              ${emp.barState === 'muted' ? `<span class="pill-tag pill-orange">${state.lang === 'zh' ? '物理静音' : 'Muted'}</span>` : ''}
+            </div>
+            <div class="as-sub">${esc(visExplain)}</div>
           </div>
-          <button type="button" class="btn btn-secondary btn-xs" id="btn-jump-emp-dec">
-            ${state.lang === 'zh' ? '切到员工端对比 →' : 'Compare Employee view →'}
-          </button>
         </div>
-      ` : ''}
 
-      <section class="panel split-view">
-        <div class="split-list-col">
-          <div class="split-list-head">
-            <button type="button" class="pill-filter ${state.decFilter === 'all' ? 'is-active' : ''}" data-dec-filter="all">${t('decFilterAll')} (${baseList.length})</button>
-            ${!isAdmin ? `<button type="button" class="pill-filter ${state.decFilter === 'pending' ? 'is-active' : ''}" data-dec-filter="pending">${t('decFilterPending')} (${pendingCount})</button>` : ''}
-            <button type="button" class="pill-filter ${state.decFilter === 'synced' ? 'is-active' : ''}" data-dec-filter="synced">${t('decFilterSynced')}</button>
-            <button type="button" class="pill-filter ${state.decFilter === 'monday' ? 'is-active' : ''}" data-dec-filter="monday">${t('decFilterMonday')} (${mondayCount})</button>
+        <div class="as-visibility">
+          <span class="as-vis-label">${t('visLabel')}</span>
+          <div class="airdrop-seg" role="group" aria-label="Voice Visibility">
+            <button type="button" class="airdrop-btn ${emp.visibility === 'self' ? 'is-active' : ''}" data-vis="self">${t('visSelfShort')}</button>
+            <button type="button" class="airdrop-btn ${emp.visibility === 'team' ? 'is-active' : ''}" data-vis="team">${t('visTeamShort')}</button>
+            <button type="button" class="airdrop-btn ${emp.visibility === 'pause30' ? 'is-active' : ''}" data-vis="pause30">${t('visPauseShort')}</button>
           </div>
-          <div class="split-items">
+        </div>
+      </section>
+
+      <!-- Master-Detail Spoken Memory Stream -->
+      <section class="memory-workspace">
+        <div class="memory-feed">
+          <div class="mf-head">
+            <div class="mf-tabs">
+              <button type="button" class="mf-tab ${state.decFilter === 'all' ? 'is-active' : ''}" data-dec-filter="all">${state.lang === 'zh' ? '全部' : 'All'} (${allMine.length})</button>
+              <button type="button" class="mf-tab ${state.decFilter === 'pending' ? 'is-active' : ''}" data-dec-filter="pending">${state.lang === 'zh' ? '待确认' : 'Inbox'} (${pendingCnt})</button>
+              <button type="button" class="mf-tab ${state.decFilter === 'synced' ? 'is-active' : ''}" data-dec-filter="synced">${state.lang === 'zh' ? '已归档' : 'Synced'}</button>
+            </div>
+          </div>
+          <div class="mf-list">
             ${list.map((d) => {
-              const owner = memberById(d.ownerId);
+              const capturer = memberById(d.capturedById);
               const dotCls = d.status === 'synced' ? 'dot-ready' : d.status === 'pending' ? 'dot-input' : 'dot-paused';
               return `
-                <button type="button" class="split-item ${selected && selected.id === d.id ? 'is-selected' : ''}" data-select-dec="${d.id}">
-                  <div class="si-top">
-                    <span class="si-meta"><span class="dot ${dotCls}"></span>${esc(pick(d.context))}</span>
-                    ${d.visitorIgnoredCount > 0 ? `<span class="badge badge-neutral">${state.lang === 'zh' ? '已过滤访客' : 'Visitor filtered'}</span>` : ''}
+                <button type="button" class="mf-card ${selected && selected.id === d.id ? 'is-selected' : ''}" data-select-dec="${d.id}">
+                  <div class="mfc-top">
+                    <span class="mfc-time"><span class="dot ${dotCls}"></span>${esc(pick(d.timeShort))} · ${esc(d.duration)}</span>
+                    ${d.visitorIgnoredCount > 0 ? `<span class="pill-tag pill-neutral">${state.lang === 'zh' ? '已滤 1 访客' : '1 visitor dropped'}</span>` : ''}
                   </div>
-                  <div class="si-title">${esc(pick(d.title))}</div>
-                  <div class="si-meta">${owner ? esc(owner.name) : t('unassigned')} · ${esc(pick(d.due))}</div>
+                  <div class="mfc-title">${esc(pick(d.title))}</div>
+                  <div class="mfc-foot">
+                    <div class="avatar-stack">
+                      ${d.participants.map((p) => renderAvatar(memberById(p.memberId), 'xs')).join('')}
+                    </div>
+                    <span class="mfc-via">${capturer ? (state.lang === 'zh' ? `经 ${capturer.name.split(' ')[0]} 的 Bar` : `Via ${capturer.name.split(' ')[0]}’s Bar`) : ''}</span>
+                  </div>
                 </button>
               `;
             }).join('')}
           </div>
         </div>
 
-        <div class="split-detail-col">
-          ${!selected
-            ? `<p style="color:var(--muted);padding:40px 0;text-align:center;">${state.lang === 'zh' ? '暂无记录' : 'No records in this view'}</p>`
-            : renderDecisionDetail(selected, statusBadge, isAdmin)
-          }
+        <div class="note-canvas">
+          ${selected ? renderDecisionNote(selected, false) : `<p style="color:var(--muted);padding:32px 0;text-align:center;">${state.lang === 'zh' ? '暂无讨论记录' : 'No notes in this filter'}</p>`}
         </div>
       </section>
     `;
   }
 
-  function renderDecisionDetail(dec, statusBadge, isAdmin) {
+  function renderDecisionNote(dec, isAdmin) {
     const owner = memberById(dec.ownerId);
     const capturer = memberById(dec.capturedById);
     const isPlaying = playingQuoteId === dec.id;
+    const showInlineAgent = !isAdmin && state.inlineAgentDecId === dec.id && state.agentResult;
+
+    const statusPill = dec.status === 'synced'
+      ? `<span class="pill-tag pill-green">${state.lang === 'zh' ? '已确认并同步团队空间' : 'Confirmed & synced'}</span>`
+      : dec.status === 'monday'
+        ? `<span class="pill-tag pill-neutral">${state.lang === 'zh' ? '周一待认领跟进' : 'Unassigned follow-up'}</span>`
+        : `<span class="pill-tag pill-amber">${state.lang === 'zh' ? '私密草稿 · 待双方确认' : 'Private draft · Confirm'}</span>`;
 
     return `
-      <div class="det-head">
-        <div>
-          <h2 class="det-title">${esc(pick(dec.title))}</h2>
-          <p class="det-summary">${esc(pick(dec.summary))}</p>
+      <div>
+        <div class="nc-eyebrow">
+          <span class="nc-provenance">
+            ${capturer ? `<i class="sw sw-${capturer.finish}"></i>` : ''}
+            <span>${esc(pick(dec.context))}${capturer ? (state.lang === 'zh' ? ` · 收录自 ${capturer.name.split(' ')[0]} 的${finishLabel(capturer.finish)} Rutta Bar` : ` · Captured via ${capturer.name.split(' ')[0]}’s Bar`) : ''}</span>
+          </span>
+          ${statusPill}
         </div>
-        ${statusBadge(dec.status)}
+        <h2 class="nc-title">${esc(pick(dec.title))}</h2>
+        <p class="nc-summary">${esc(pick(dec.summary))}</p>
       </div>
 
-      <div class="kv-grid">
-        <div>
-          <div class="kv-k">${t('kvOwner')}</div>
-          <div class="kv-v">
+      <div class="nc-bento-row">
+        <div class="nc-bento">
+          <span class="ncb-label">${state.lang === 'zh' ? '负责人与节点' : 'Owner & target date'}</span>
+          <div class="ncb-main">
             ${dec.status === 'monday' && !owner
-              ? `<select class="select-clean" data-assign-owner="${dec.id}">
-                  <option value="">${t('assignPlaceholder')}</option>
+              ? `<select class="mac-btn mac-btn-subtle mac-btn-xs" data-assign-owner="${dec.id}">
+                  <option value="">${state.lang === 'zh' ? '指派负责人…' : 'Assign owner…'}</option>
                   ${state.members.filter((m) => m.active).map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('')}
                 </select>`
-              : `${renderAvatar(owner, 'sm')}<span>${owner ? esc(owner.name) : t('unassigned')}</span>`
+              : `<span class="ncb-owner">${renderAvatar(owner, 'sm')}<span>${owner ? esc(owner.name) : (state.lang === 'zh' ? '待认领' : 'Unassigned')}</span></span>`
             }
+            <span class="ncb-due">${esc(pick(dec.due))}</span>
           </div>
         </div>
-        <div>
-          <div class="kv-k">${t('kvDue')}</div>
-          <div class="kv-v">${esc(pick(dec.due))}</div>
-        </div>
-        <div>
-          <div class="kv-k">${t('kvSource')}</div>
-          <div class="kv-v">
-            ${capturer
-              ? `<i class="sw sw-${capturer.finish}"></i><span>${state.lang === 'zh' ? `${capturer.name.split(' ')[0]} 的 Rutta Bar` : `${capturer.name.split(' ')[0]}’s Bar`}</span>`
-              : esc(pick(dec.context))}
+
+        <div class="nc-bento ${dec.status === 'synced' ? 'nc-bento-sage' : 'nc-bento-warm'}">
+          <span class="ncb-label">${dec.status === 'synced'
+            ? (state.lang === 'zh' ? '已自动流转至' : 'Synced destinations')
+            : (state.lang === 'zh' ? '在场成员确认后解锁共享' : 'Participants confirm to share')}</span>
+          <div class="confirm-pills">
+            ${dec.status === 'synced'
+              ? dec.syncedTools.map((tool) => `<span class="pill-tag pill-green">✓ ${esc(tool)}</span>`).join('')
+              : dec.participants.map((p) => {
+                  const m = memberById(p.memberId);
+                  const first = m ? m.name.split(' ')[0] : '?';
+                  return `
+                    <button type="button" class="confirm-pill ${p.confirmed ? 'is-done' : ''}" data-confirm-part="${dec.id}:${p.memberId}">
+                      ${renderAvatar(m, 'xs')}
+                      <span>${esc(first)} · ${p.confirmed ? (state.lang === 'zh' ? '已确认 ✓' : 'Confirmed ✓') : (state.lang === 'zh' ? '点此确认' : 'Confirm')}</span>
+                    </button>
+                  `;
+                }).join('')
+            }
           </div>
         </div>
       </div>
 
       ${dec.visitorIgnoredCount > 0 ? `
-        <div class="visitor-notice-bar">
+        <div style="display:flex;align-items:center;gap:8px;padding:9px 13px;border-radius:10px;background:var(--bento-cool);font-size:12px;color:var(--ink-2);">
           ${ICONS.shield}
           <span>${state.lang === 'zh'
-            ? `讨论期间检测到 ${dec.visitorIgnoredCount} 位未加入访客发言，状态灯未亮，音频已实时丢弃。`
-            : `${dec.visitorIgnoredCount} unenrolled visitor spoke during this session — LED stayed dark and audio was dropped.`}</span>
+            ? `讨论中检测到 ${dec.visitorIgnoredCount} 位未加入声纹圈的外部访客开口：指示灯未亮，访客语音已实时丢弃。`
+            : `${dec.visitorIgnoredCount} unenrolled visitor spoke during this session: LED stayed dark and visitor audio was dropped immediately.`}</span>
         </div>
       ` : ''}
 
-      <div class="confirm-section">
-        ${dec.status === 'synced'
-          ? `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);">
-              <span>${t('syncedToLabel')}:</span>
-              ${dec.syncedTools.map((st) => `<span class="badge badge-green">✓ ${esc(st)}</span>`).join('')}
-            </div>`
-          : `<div class="confirm-list">
-              <span style="font-size:12.5px;color:var(--muted);">${t('confirmPrompt')}</span>
-              ${dec.participants.map((p) => {
-                const m = memberById(p.memberId);
-                const first = m ? m.name.split(' ')[0] : '?';
-                return `
-                  <button type="button" class="confirm-chip ${p.confirmed ? 'is-confirmed' : ''}" data-confirm-part="${dec.id}:${p.memberId}">
-                    ${renderAvatar(m, 'sm')}
-                    <span>${esc(first)} · ${p.confirmed ? t('confirmedTag') : t('confirmAction')}</span>
-                  </button>
-                `;
-              }).join('')}
-            </div>`
-        }
-      </div>
-
       ${isAdmin ? `
-        <div class="quote-box is-admin-locked">
-          <div class="qal-icon">${ICONS.lock}</div>
-          <div>
-            <div class="qal-title">${t('adminAudioLockedTitle')}</div>
-            <div class="qal-desc">${t('adminAudioLockedDesc')}</div>
+        <div class="encrypted-vault">
+          <div class="ev-left">
+            <div class="ev-lock-orb">${ICONS.lock}</div>
+            <div>
+              <div class="ev-title">${state.lang === 'zh' ? '端到端参与者原声锁（管理者无权回放）' : 'Participant-Encrypted Source Clip (Locked for Admins)'}</div>
+              <div class="ev-desc">${state.lang === 'zh' ? '原声波形仅对本场在场成员开放核对，并在确认 7 天后自动抹除；管理者仅可查看上方已确认文字结论。' : 'Original audio waveforms are accessible strictly to present participants and auto-erase 7 days after confirmation.'}</div>
+            </div>
           </div>
+          <button type="button" class="mac-btn mac-btn-subtle mac-btn-xs" id="btn-demo-switch-listener">
+            <span>${state.lang === 'zh' ? '以当事人视角试听' : 'Preview as participant'}</span>
+            ${ICONS.ext}
+          </button>
         </div>
       ` : `
-        <div class="quote-box">
-          <div class="qb-top">
-            <span class="qb-title">${t('quoteTitle')} (${dec.quoteDuration})</span>
-            <span class="qb-lock">${ICONS.lock} ${t('quoteLock')}</span>
+        <div class="voice-proof-card">
+          <div class="vp-head">
+            <div class="vp-legend">
+              <span>${state.lang === 'zh' ? '双轨声纹核对片段' : 'Dual-track source clip'} (${dec.quoteDuration})</span>
+              <span style="font-weight:500;color:var(--muted);"><i class="spk-dot spk-a"></i>${esc(dec.quotes[0]?.speaker || 'A')}</span>
+              ${dec.quotes[1] ? `<span style="font-weight:500;color:var(--muted);"><i class="spk-dot spk-b"></i>${esc(dec.quotes[1].speaker)}</span>` : ''}
+            </div>
+            <span style="display:inline-flex;align-items:center;gap:5px;color:var(--muted);">
+              ${ICONS.lock}
+              <span>${state.lang === 'zh' ? '仅在场成员可回放 · 7 天后自动抹除' : 'Participants only · Auto-erases in 7d'}</span>
+            </span>
           </div>
-          <div class="qb-player">
-            <button type="button" class="qb-play" data-play-quote="${dec.id}" aria-label="Play quote">
+
+          <div class="vp-scrubber">
+            <button type="button" class="vp-play-btn" data-play-quote="${dec.id}" aria-label="Play source clip">
               ${isPlaying ? ICONS.pause : ICONS.play}
             </button>
-            <div class="qb-wave" id="qd-wave-${dec.id}">
-              ${Array.from({ length: 56 }, (_, i) => {
-                const h = 22 + ((i * 37 + 17) % 74);
-                const played = isPlaying && (i / 56) <= quotePlayPct;
-                return `<span class="${played ? 'is-played' : ''}" style="height:${h}%"></span>`;
+            <div class="vp-bars" id="qd-wave-${dec.id}">
+              ${Array.from({ length: 60 }, (_, i) => {
+                const h = 24 + ((i * 37 + 19) % 72);
+                const trackCls = i < 28 ? 'track-a' : 'track-b';
+                const played = isPlaying ? (i / 60) <= quotePlayPct : i < 16;
+                return `<span class="${trackCls} ${played ? 'is-played' : ''}" style="height:${h}%"></span>`;
               }).join('')}
             </div>
-            <span class="qb-time" id="qd-time-${dec.id}">${isPlaying ? formatClipTime(dec.quoteDuration, quotePlayPct) : `0:00 / ${dec.quoteDuration}`}</span>
+            <span class="vp-clock" id="qd-time-${dec.id}">${isPlaying ? formatClipTime(dec.quoteDuration, quotePlayPct) : `0:00 / ${dec.quoteDuration}`}</span>
           </div>
-          <div class="qb-lines">
+
+          <div class="vp-transcript">
             ${dec.quotes.map((q) => `
-              <div class="qb-line ${q.key ? 'is-key' : ''}">
-                <span class="qb-ts">${q.ts}</span>
-                <span class="qb-spk">${esc(q.speaker)}</span>
+              <div class="vpt-row ${q.key ? 'is-key' : ''}">
+                <span class="vpt-ts">${q.ts}</span>
+                <span class="vpt-spk" style="color:${q.track === 'a' ? 'var(--indigo)' : 'var(--green-deep)'}">${esc(q.speaker)}</span>
                 <span>${esc(pick(q))}</span>
               </div>
             `).join('')}
           </div>
         </div>
-      `}
 
-      <div class="det-actions">
-        ${!isAdmin
-          ? `<button type="button" class="btn btn-ghost btn-xs" style="color:var(--red);" data-delete-dec="${dec.id}">${t('btnDeleteRec')}</button>`
-          : `<span style="font-size:12px;color:var(--muted);">${state.lang === 'zh' ? '文字决定留存中 · 原声片段到期自动销毁' : 'Text decision archived · Source clip auto-expires'}</span>`
-        }
-        ${!isAdmin
-          ? `<button type="button" class="btn btn-primary btn-xs" data-handoff-dec="${dec.id}">${t('btnHandoffAgent')}</button>`
-          : ''
-        }
-      </div>
+        <div class="inline-agent-bar">
+          <div class="iab-row">
+            <div class="iab-chips">
+              <span style="font-size:11.5px;font-weight:600;color:var(--muted);margin-right:2px;">${state.lang === 'zh' ? '顺手交给 Agent：' : 'Hand off to Agent:'}</span>
+              <button type="button" class="prompt-pill ${showInlineAgent && state.agentPreset === 'client-email' ? 'is-active' : ''}" data-inline-agent="${dec.id}:client-email">${state.lang === 'zh' ? '起草客户延期邮件' : 'Draft client update email'}</button>
+              <button type="button" class="prompt-pill ${showInlineAgent && state.agentPreset === 'linear-task' ? 'is-active' : ''}" data-inline-agent="${dec.id}:linear-task">${state.lang === 'zh' ? '生成 Linear 任务单' : 'Create Linear issue'}</button>
+            </div>
+            <button type="button" class="mac-btn mac-btn-ghost mac-btn-xs" style="color:var(--red);" data-delete-dec="${dec.id}">
+              ${state.lang === 'zh' ? '销毁此段记录与原声' : 'Destroy note & clip'}
+            </button>
+          </div>
+
+          ${showInlineAgent ? `
+            <div class="agent-draft-box">
+              <div class="adb-meta">
+                <span>${esc(state.agentResult.citation)}</span>
+                <span>${esc(state.agentResult.channel)}</span>
+              </div>
+              <div class="adb-body">${esc(state.agentResult.body)}</div>
+              <div class="adb-foot">
+                <span>${state.lang === 'zh' ? '仅基于已确认文字结论生成 · 未读取原始音频' : 'Grounded in confirmed text only · Zero raw audio read'}</span>
+                <button type="button" class="mac-btn mac-btn-primary mac-btn-xs" id="inline-agent-send" ${state.agentApproved ? 'disabled' : ''}>
+                  ${state.agentApproved ? (state.lang === 'zh' ? '已发送 ✓' : 'Sent ✓') : (state.lang === 'zh' ? '确认并发送' : 'Approve & send')}
+                </button>
+              </div>
+            </div>
+          ` : ''}
+        </div>
+      `}
     `;
   }
 
@@ -894,445 +635,197 @@
   }
 
   /* =====================================================================
-   * ADMIN VIEW 1: VOICEPRINTS TABLE
+   * EMPLOYEE VIEW 2: MY VOICEPRINT & STUDIO HARDWARE STAGE
    * ===================================================================== */
-  function renderAdminVoiceprintsView() {
-    const activeMembers = state.members.filter((m) => m.active);
-    const peerAllowedCount = activeMembers.filter((m) => canBeCapturedByPeer(m)).length;
-    const q = state.vpSearch.trim().toLowerCase();
-    const rows = state.members.filter((m) => {
-      if (state.vpFilter === 'active' && !m.active) return false;
-      if (state.vpFilter === 'paused' && m.active) return false;
-      if (!q) return true;
-      return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || pick(m.role).toLowerCase().includes(q);
-    });
+  function renderEmployeeBarView() {
+    const emp = currentEmployee();
+    const isMuted = emp.barState === 'muted';
 
-    const barStatusLabel = (bs) => {
-      if (bs === 'muted') return state.lang === 'zh' ? '物理静音' : 'Muted';
-      if (bs === 'lid_closed') return state.lang === 'zh' ? '合盖待机' : 'Lid closed';
-      return state.lang === 'zh' ? '在线' : 'Online';
-    };
+    let stageImg = mountedPhoto(emp.finish);
+    let stageBadge = `${finishLabel(emp.finish)} Rutta Bar · ${isMuted ? (state.lang === 'zh' ? '物理静音已拨下' : 'Hardware muted') : (state.lang === 'zh' ? 'MacBook Air 侧插待机中' : 'Side-mounted & ready')}`;
+    if (state.hwStageView === 'macro') {
+      stageImg = isMuted ? 'assets/macro-mute.webp' : 'assets/macro-ready.webp';
+      stageBadge = isMuted
+        ? (state.lang === 'zh' ? '微距实拍 · 露出橙色机械标，顶灯彻底熄灭' : 'Macro · Orange mark exposed, LED dark')
+        : (state.lang === 'zh' ? '微距实拍 · 顶部绿灯缓慢呼吸，滑键开启' : 'Macro · Breathing green LED, switch open');
+    } else if (state.hwStageView === 'closed') {
+      stageImg = 'assets/closedside-1200.webp';
+      stageBadge = state.lang === 'zh' ? '合盖休眠持续待机 · 散会补一句不漏记' : 'Lid-closed standby · Captures hallway wrap-ups';
+    }
 
-    const peerBadge = (m) => {
-      if (!m.active) return `<span class="badge badge-neutral">${t('statusPaused')}</span>`;
-      if (m.tempPauseMinutes > 0) return `<span class="badge badge-amber">${t('peerTempPaused')}</span>`;
-      if (m.allowPeerCapture) return `<span class="badge badge-green">${t('peerAllowed')}</span>`;
-      return `<span class="badge badge-neutral">${ICONS.lock} ${t('peerSelfOnly')}</span>`;
-    };
-
-    return `
-      <section class="metrics-row">
-        <div class="panel metric-card">
-          <div class="mc-label">
-            <span>${t('metricEnrolled')}</span>
-            <span class="badge badge-green"><span class="dot dot-ready"></span>${state.lang === 'zh' ? '白名单生效' : 'Active'}</span>
-          </div>
-          <div class="mc-value-row">
-            <span class="mc-value">${activeMembers.length} <span style="font-size:15px;font-weight:500;color:var(--muted);">/ ${state.members.length}</span></span>
-          </div>
-          <div class="mc-foot">${t('metricEnrolledFoot')}</div>
-        </div>
-
-        <div class="panel metric-card">
-          <div class="mc-label">
-            <span>${t('metricPeerAllowed')}</span>
-            <span class="badge badge-neutral">${ICONS.lock} ${state.lang === 'zh' ? '本人授权' : 'Self-owned'}</span>
-          </div>
-          <div class="mc-value-row">
-            <span class="mc-value">${peerAllowedCount} <span style="font-size:15px;font-weight:500;color:var(--muted);">/ ${activeMembers.length}</span></span>
-            <button type="button" class="link-act" id="jump-emp-consent">${state.lang === 'zh' ? '去员工端体验 →' : 'Employee view →'}</button>
-          </div>
-          <div class="mc-foot">${t('metricPeerFoot')}</div>
-        </div>
-
-        <div class="panel metric-card">
-          <div class="mc-label">
-            <span>${t('metricBlocked')}</span>
-            <span class="badge badge-neutral">${state.lang === 'zh' ? '0 留存' : '0 saved'}</span>
-          </div>
-          <div class="mc-value-row">
-            <span class="mc-value">${state.blockedVisitorsToday}</span>
-          </div>
-          <div class="mc-foot">${t('metricBlockedFoot')}</div>
-        </div>
-      </section>
-
-      <section class="panel table-panel">
-        <div class="table-toolbar">
-          <div class="seg-tabs" role="group">
-            <button type="button" class="seg-tab ${state.vpFilter === 'all' ? 'is-active' : ''}" data-vp-filter="all">${t('filterAll')} (${state.members.length})</button>
-            <button type="button" class="seg-tab ${state.vpFilter === 'active' ? 'is-active' : ''}" data-vp-filter="active">${t('filterActive')}</button>
-            <button type="button" class="seg-tab ${state.vpFilter === 'paused' ? 'is-active' : ''}" data-vp-filter="paused">${t('filterPaused')}</button>
-          </div>
-          <div class="search-box">
-            ${ICONS.search}
-            <input type="search" id="vp-search-input" value="${esc(state.vpSearch)}" placeholder="${esc(t('searchPlaceholder'))}">
-          </div>
-        </div>
-
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>${t('colMember')}</th>
-              <th>${t('colVoiceprint')}</th>
-              <th>${t('colPeerConsent')}</th>
-              <th>${t('colDevice')}</th>
-              <th>${t('colLastHeard')}</th>
-              <th>${t('colEnabled')}</th>
-              <th style="text-align:right;">${t('colActions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.length === 0
-              ? `<tr><td colspan="7" style="text-align:center;padding:36px;color:var(--muted);">${t('emptyRoster')}</td></tr>`
-              : rows.map((m) => `
-                <tr class="${m.active ? '' : 'is-paused'}" data-open-member="${m.id}">
-                  <td>
-                    <div class="user-cell">
-                      ${renderAvatar(m)}
-                      <div>
-                        <div class="u-name">${esc(m.name)}</div>
-                        <div class="u-meta">${esc(pick(m.role))} · ${esc(m.email)}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div class="vp-cell">
-                      <div class="mini-wave" aria-hidden="true">
-                        ${m.bars.map((h) => `<span style="height:${Math.round(h * 0.17)}px"></span>`).join('')}
-                      </div>
-                      <span class="badge ${m.active ? 'badge-green' : 'badge-neutral'}">${m.active ? t('statusActive') : t('statusPaused')}</span>
-                    </div>
-                  </td>
-                  <td>${peerBadge(m)}</td>
-                  <td>
-                    <span class="bar-cell">
-                      <i class="sw sw-${m.finish}"></i>
-                      <span>${finishLabel(m.finish)} · ${barStatusLabel(m.barState)}</span>
-                    </span>
-                  </td>
-                  <td class="time-cell">${esc(pick(m.lastHeard))}</td>
-                  <td onclick="event.stopPropagation()">
-                    <button type="button" class="toggle" role="switch" aria-checked="${m.active}" data-toggle-member="${m.id}" aria-label="${esc(m.name)}"></button>
-                  </td>
-                  <td onclick="event.stopPropagation()">
-                    <div class="row-actions">
-                      <button type="button" class="link-act" data-inspect-member="${m.id}">${t('actDetails')}</button>
-                      <button type="button" class="link-act danger" data-delete-member="${m.id}">${t('actRemove')}</button>
-                    </div>
-                  </td>
-                </tr>
-              `).join('')
-            }
-          </tbody>
-        </table>
-      </section>
-    `;
-  }
-
-  /* ---------- Admin Right-Side Inspector Drawer ---------- */
-  function renderMemberDrawer(memberId) {
-    const m = memberById(memberId);
-    if (!m) { closeMemberDrawer(); return; }
-    state.inspectedMemberId = memberId;
-    const isMuted = m.barState === 'muted';
-    const previewMode = isMuted ? 'mute' : 'ready';
-
-    const drawer = $('#member-drawer');
-    drawer.innerHTML = `
-      <div class="id-head">
-        <div class="user-cell">
-          ${renderAvatar(m)}
-          <div>
-            <div class="u-name">${esc(m.name)}</div>
-            <div class="u-meta">${esc(pick(m.role))} · ${esc(m.email)}</div>
-          </div>
-        </div>
-        <button type="button" class="icon-btn" id="drawer-close" aria-label="Close">${ICONS.close}</button>
-      </div>
-      <div class="id-body">
-        <div>
-          <div class="kv-k">${t('drawerVoiceLabel')}</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);margin-top:6px;">
-            <div class="vp-cell">
-              <div class="mini-wave">${m.bars.map((h) => `<span style="height:${Math.round(h * 0.18)}px"></span>`).join('')}</div>
-              <span class="badge ${m.active ? 'badge-green' : 'badge-neutral'}">${m.active ? t('statusActive') : t('statusPaused')}</span>
-            </div>
-            <button type="button" class="toggle" role="switch" aria-checked="${m.active}" id="drawer-toggle-active"></button>
-          </div>
-        </div>
-
-        <div>
-          <div class="kv-k">${t('drawerPeerLabel')}</div>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);margin-top:6px;">
-            <div>
-              <div style="font-size:13px;font-weight:580;">${canBeCapturedByPeer(m) ? t('peerAllowed') : t('peerSelfOnly')}</div>
-              <div style="font-size:11.5px;color:var(--muted);margin-top:2px;">${state.lang === 'zh' ? '管理者仅可查看，不可代员工开启' : 'Read-only for admins'}</div>
-            </div>
-            <button type="button" class="toggle" role="switch" aria-checked="${m.allowPeerCapture}" disabled aria-label="Employee controlled"></button>
-          </div>
-        </div>
-
-        <div>
-          <div class="kv-k">${t('drawerDeviceLabel')} · ${finishLabel(m.finish)} Rutta Bar</div>
-          <div class="hw-studio-box" style="margin-top:6px;padding:15px 18px;">
-            ${renderMemberHardwareVisual(m, previewMode, 'drawer-hw-switch')}
-            <div style="margin-top:10px;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);">
-              <span>${m.finish === 'silver' ? t('drawerMuteHint') : (state.lang === 'zh' ? '机械静音滑键硬件断麦' : 'Hardware mic disconnect')}</span>
-              <span>${isMuted ? t('diagMute') : t('diagReady')}</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;">
-          <button type="button" class="btn btn-secondary" style="flex:1;" id="drawer-verify-btn">${t('drawerVerifyBtn')}</button>
-          <button type="button" class="btn btn-secondary" style="flex:1;" id="drawer-reenroll-btn">${t('drawerReenroll')}</button>
-        </div>
-
-        <div class="drawer-kv-list">
-          <div class="drawer-kv-row">
-            <span>${t('colLastHeard')}</span>
-            <span>${esc(pick(m.lastHeard))}</span>
-          </div>
-          <div class="drawer-kv-row">
-            <span>${state.lang === 'zh' ? '原始音频访问' : 'Raw audio access'}</span>
-            <span>${state.lang === 'zh' ? '仅本人与在场成员' : 'Participants only'}</span>
-          </div>
-        </div>
-      </div>
-      <div class="id-foot">
-        <button type="button" class="btn btn-ghost" style="color:var(--red);" id="drawer-remove-btn">${t('drawerRemove')}</button>
-        <button type="button" class="btn btn-primary" id="drawer-done-btn">${state.lang === 'zh' ? '完成' : 'Done'}</button>
-      </div>
-    `;
-
-    $('#member-drawer-backdrop').hidden = false;
-    $('#drawer-close', drawer).addEventListener('click', closeMemberDrawer);
-    $('#drawer-done-btn', drawer).addEventListener('click', closeMemberDrawer);
-    $('#drawer-toggle-active', drawer).addEventListener('click', () => {
-      m.active = !m.active;
-      renderAll();
-      renderMemberDrawer(m.id);
-    });
-    $('#drawer-hw-switch', drawer).addEventListener('click', () => {
-      m.barState = m.barState === 'muted' ? 'online' : 'muted';
-      if (m.id === 'maya') state.hwState = m.barState === 'muted' ? 'mute' : 'ready';
-      playSwitchClick(m.barState === 'muted');
-      renderAll();
-      renderMemberDrawer(m.id);
-    });
-    $('#drawer-verify-btn', drawer).addEventListener('click', () => {
-      if (!m.active) {
-        showToast(state.lang === 'zh' ? `${m.name} 声纹当前已暂停，发言将被忽略` : `${m.name}’s voiceprint is paused`);
-      } else {
-        m.lastHeard = { zh: '刚刚验证通过', en: 'Verified just now' };
-        showToast(state.lang === 'zh' ? `声纹识别正常 · 已匹配 ${m.name}` : `Voiceprint matched ${m.name}`);
-        renderAll();
-        renderMemberDrawer(m.id);
+    const visOpts = [
+      {
+        id: 'team',
+        title: state.lang === 'zh' ? '同团队成员设备可收录（推荐）' : 'Team Rutta Bars allowed (Recommended)',
+        tag: state.lang === 'zh' ? '小会互通' : 'Huddles OK',
+        desc: state.lang === 'zh'
+          ? '与同事开小会或围坐讨论时，对方的 Rutta Bar 可以识别你的声纹，并将生成的草稿同步推给你确认后才对外共享。'
+          : 'During desk huddles, a teammate’s Rutta Bar can recognize you and send the private draft to both of you for confirmation.'
+      },
+      {
+        id: 'self',
+        title: state.lang === 'zh' ? '仅我的 Mac 设备可收录' : 'My Mac’s Rutta Bar only',
+        tag: state.lang === 'zh' ? '他人设备不亮灯' : 'Strict self-only',
+        desc: state.lang === 'zh'
+          ? '只有插在你本人电脑上的 Rutta Bar 能识别你；其他同事的设备遇到你的声音将视同外部访客——不亮灯、不转写、0 留存。'
+          : 'Only your own Mac’s Bar recognizes you. Other teammates’ Bars treat your voice like an external visitor—LED stays dark, 0 saved.'
+      },
+      {
+        id: 'pause30',
+        title: state.lang === 'zh' ? '临时免打扰（30 分钟）' : 'Quiet Mode (Pause 30 minutes)',
+        tag: state.lang === 'zh' ? '聊私事一键隐身' : 'Temporary pause',
+        desc: state.lang === 'zh'
+          ? '临时谈私事或敏感话题时一键开启，30 分钟内所有设备均静默忽略你的声音，到期自动恢复原设置。'
+          : 'Silently ignores your voice across every device for 30 minutes during private chats, then resumes automatically.'
       }
-    });
-    $('#drawer-reenroll-btn', drawer).addEventListener('click', () => {
-      closeMemberDrawer();
-      openEnrollModal(m.id);
-    });
-    $('#drawer-remove-btn', drawer).addEventListener('click', () => {
-      closeMemberDrawer();
-      openDeleteModal(m.id);
-    });
-  }
-
-  function closeMemberDrawer() {
-    state.inspectedMemberId = null;
-    $('#member-drawer-backdrop').hidden = true;
-  }
-
-  /* =====================================================================
-   * ADMIN VIEW 3: TEAM DEVICES & DIAGNOSTIC
-   * ===================================================================== */
-  function renderAdminDevicesView() {
-    const imgs = {
-      silver: 'assets/hero-silver.webp',
-      sky: 'assets/hero-sky.webp',
-      starlight: 'assets/hero-starlight.webp',
-      midnight: 'assets/hero-midnight.webp'
-    };
-    const diagCopy = {
-      ready: [t('diagReadyHead'), t('diagReadyBody'), 'badge-green', t('diagReady')],
-      input: [t('diagInputHead'), t('diagInputBody'), 'badge-amber', t('diagInput')],
-      visitor: [t('diagVisitorHead'), t('diagVisitorBody'), 'badge-neutral', t('diagVisitor')],
-      mute: [t('diagMuteHead'), t('diagMuteBody'), 'badge-orange', t('diagMute')]
-    };
-    const [dHead, dBody, dBadgeCls, dBadgeText] = diagCopy[state.hwState];
-    const teamBars = state.members.slice(0, 4);
+    ];
 
     return `
-      <section class="panel device-hero-panel">
-        <div class="hw-studio-box">
-          <div class="hw-studio-head">
-            <span style="display:inline-flex;align-items:center;gap:7px;">
-              <span class="dot dot-${state.hwState}"></span>
-              <span>Rutta Bar · ${finishLabel('silver')}</span>
-            </span>
-            <span class="badge ${dBadgeCls}">${dBadgeText}</span>
-          </div>
-          <div class="hw-render-wrap">
-            <img src="${hwImageForState(state.hwState)}" alt="Rutta Bar hardware">
-            <span class="hw-led-overlay mode-${state.hwState}" aria-hidden="true"></span>
-            <button type="button" class="hw-switch-area" id="hw-switch-hotspot" aria-label="Physical mute switch"></button>
-          </div>
-        </div>
-
-        <div class="hw-diag-col">
-          <div>
-            <h2 class="hw-diag-title">${t('diagTitle')}</h2>
-            <p class="hw-diag-desc">${t('diagDesc')}</p>
-          </div>
-          <div class="diag-seg" role="group">
-            <button type="button" class="diag-btn ${state.hwState === 'ready' ? 'is-active' : ''}" data-diag="ready">${t('diagReady')}</button>
-            <button type="button" class="diag-btn ${state.hwState === 'input' ? 'is-active' : ''}" data-diag="input">${t('diagInput')}</button>
-            <button type="button" class="diag-btn ${state.hwState === 'visitor' ? 'is-active' : ''}" data-diag="visitor">${t('diagVisitor')}</button>
-            <button type="button" class="diag-btn ${state.hwState === 'mute' ? 'is-active' : ''}" data-diag="mute">${t('diagMute')}</button>
-          </div>
-          <div class="diag-readout">
-            <strong>${esc(dHead)}</strong>
-            <span>${esc(dBody)}</span>
-          </div>
-        </div>
-      </section>
-
-      <div class="fleet-head">
-        <h2>${state.multiBarSync ? t('syncBannerText') : t('fleetTitle')}</h2>
-      </div>
-
-      <section class="fleet-grid">
-        ${teamBars.map((m, idx) => {
-          const isSync = state.multiBarSync && idx < 3;
-          const isLocalActive = idx === 0 && !isSync;
-          const isMuted = !isSync && (isLocalActive ? state.hwState === 'mute' : m.barState === 'muted');
-          const isInput = isSync || (isLocalActive && state.hwState === 'input');
-          const isVisitor = isLocalActive && state.hwState === 'visitor';
-          const isLid = !isSync && !isMuted && !isInput && !isVisitor && m.barState === 'lid_closed';
-          const dot = isInput ? 'dot-input' : isMuted ? 'dot-mute' : isVisitor ? 'dot-visitor' : 'dot-ready';
-          const badge = isSync
-            ? `<span class="badge badge-amber">${state.lang === 'zh' ? '同频同步' : 'Synced'}</span>`
-            : isInput
-              ? `<span class="badge badge-amber">${t('diagInput')}</span>`
-              : isMuted
-                ? `<span class="badge badge-orange">${t('diagMute')}</span>`
-                : isVisitor
-                  ? `<span class="badge badge-neutral">${t('diagVisitor')}</span>`
-                  : isLid
-                    ? `<span class="badge badge-green">${state.lang === 'zh' ? '合盖待机' : 'Lid closed'}</span>`
-                    : `<span class="badge badge-green">${t('diagReady')}</span>`;
-
-          return `
-            <div class="panel fleet-card ${isSync ? 'is-sync' : ''}">
-              <div class="fc-img">
-                <span class="dot ${dot}"></span>
-                <img src="${imgs[m.finish]}" alt="${finishLabel(m.finish)} Rutta Bar">
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;">
-                <div>
-                  <div class="fc-name">${esc(m.name)}</div>
-                  <div class="fc-sub">${finishLabel(m.finish)} · ${canBeCapturedByPeer(m) ? (state.lang === 'zh' ? '可被他人录' : 'Peers OK') : (state.lang === 'zh' ? '仅限本机' : 'Self only')}</div>
-                </div>
-                ${badge}
-              </div>
+      <div class="studio-split">
+        <section class="hw-stage-card">
+          <div class="cb-head" style="margin-bottom:0;">
+            <div>
+              <h2>${esc(emp.name)} · ${finishLabel(emp.finish)} Rutta Bar</h2>
+              <p>${state.lang === 'zh' ? 'USB-C 直连供电 · 无内置电池 · 双面盲拨机械静音滑键' : 'USB-C powered · Battery-free · Tactile mechanical mute slider'}</p>
             </div>
-          `;
-        }).join('')}
-      </section>
+            <div class="airdrop-seg">
+              <button type="button" class="airdrop-btn ${state.hwStageView === 'mounted' ? 'is-active' : ''}" data-stage-view="mounted">${state.lang === 'zh' ? '装机实拍' : 'Mounted'}</button>
+              <button type="button" class="airdrop-btn ${state.hwStageView === 'macro' ? 'is-active' : ''}" data-stage-view="macro">${state.lang === 'zh' ? '滑键微距' : 'Switch macro'}</button>
+              <button type="button" class="airdrop-btn ${state.hwStageView === 'closed' ? 'is-active' : ''}" data-stage-view="closed">${state.lang === 'zh' ? '合盖待机' : 'Lid closed'}</button>
+            </div>
+          </div>
 
-      <section class="panel lid-row-card ${state.lidClosed ? '' : 'is-open'}">
-        <div class="lid-img-wrap">
-          <img src="assets/closedside-1200.webp" alt="Closed MacBook Air with Rutta Bar">
-          <span class="lid-dot" aria-hidden="true"></span>
-        </div>
-        <div class="lid-info">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
-            <h3 style="font-size:15px;font-weight:630;">${t('lidTitle')}</h3>
-            <span class="badge ${state.lidClosed ? 'badge-green' : 'badge-neutral'}">${state.lidClosed ? t('lidClosedTag') : t('lidOpenTag')}</span>
+          <div class="sculptural-frame">
+            <img src="${stageImg}" alt="Rutta Bar studio view">
+            <span class="sf-badge-tl">
+              <span class="dot ${isMuted ? 'dot-mute' : 'dot-ready'}"></span>
+              <span>${esc(stageBadge)}</span>
+            </span>
+            <div class="sf-action-br">
+              <button type="button" class="mac-btn ${isMuted ? 'mac-btn-primary' : 'mac-btn-subtle'}" id="btn-stage-mute">
+                ${isMuted ? (state.lang === 'zh' ? '推回滑键 · 恢复待机' : 'Slide open · Resume') : (state.lang === 'zh' ? '拨下物理静音滑键' : 'Slide physical mute')}
+              </button>
+            </div>
           </div>
-          <p style="font-size:13px;color:var(--ink-2);line-height:1.58;">${t('lidDesc')}</p>
-          <div style="margin-top:4px;">
-            <button type="button" class="btn btn-secondary btn-xs" id="btn-toggle-lid">${t('lidToggleBtn')}</button>
+
+          <div class="kv-box">
+            <div class="kv-line">
+              <span>${state.lang === 'zh' ? '声纹校准状态' : 'Acoustic signature'}</span>
+              <span style="display:inline-flex;align-items:center;gap:8px;">
+                <span class="sr-wave">${emp.bars.map((h) => `<span style="height:${Math.round(h * 0.17)}px"></span>`).join('')}</span>
+                <span class="pill-tag pill-green">${state.lang === 'zh' ? '已校准' : 'Calibrated'}</span>
+              </span>
+            </div>
+            <div class="kv-line">
+              <span>${state.lang === 'zh' ? '合盖休眠持续待机' : 'Lid-closed standby'}</span>
+              <button type="button" class="mac-switch" role="switch" aria-checked="${emp.lidStandby}" id="emp-lid-switch"></button>
+            </div>
           </div>
-        </div>
-      </section>
+
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <button type="button" class="mac-btn mac-btn-subtle mac-btn-xs" id="emp-reenroll-btn">${state.lang === 'zh' ? '重新朗读校准声纹' : 'Recalibrate voiceprint'}</button>
+            <button type="button" class="mac-btn mac-btn-subtle mac-btn-xs" id="emp-test-peer-banner">${state.lang === 'zh' ? '测试与 Maya 开小会时的收录提示' : 'Simulate huddle with Maya'}</button>
+          </div>
+        </section>
+
+        <section class="card-box">
+          <div class="cb-head">
+            <div>
+              <h2>${state.lang === 'zh' ? '谁的 Rutta Bar 可以收录我的声音' : 'Who Can Capture My Voice'}</h2>
+              <p>${state.lang === 'zh' ? '像 AirDrop 一样随时切换可见范围；仅你本人可改，团队管理员无法代开。' : 'Switch visibility anytime like AirDrop—admins cannot override your choice.'}</p>
+            </div>
+            <span class="pill-tag pill-neutral">${ICONS.lock} ${state.lang === 'zh' ? '本人独占' : 'Self-owned'}</span>
+          </div>
+
+          <div class="consent-radio-cards">
+            ${visOpts.map((opt) => `
+              <button type="button" class="consent-card-opt ${emp.visibility === opt.id ? 'is-selected' : ''}" data-pick-vis="${opt.id}">
+                <div>
+                  <div class="cco-title">
+                    <span>${esc(opt.title)}</span>
+                    <span class="pill-tag ${opt.id === 'team' ? 'pill-green' : opt.id === 'pause30' ? 'pill-amber' : 'pill-neutral'}">${esc(opt.tag)}</span>
+                  </div>
+                  <p class="cco-desc">${esc(opt.desc)}</p>
+                </div>
+                <span class="cco-radio" aria-hidden="true"></span>
+              </button>
+            `).join('')}
+          </div>
+        </section>
+      </div>
     `;
   }
 
   /* =====================================================================
-   * AGENT & INTEGRATIONS VIEWS (Employee vs Admin)
+   * EMPLOYEE VIEW 3: ASK AGENT (MCP CONTEXT HANDOFF)
    * ===================================================================== */
-  function renderAgentCard() {
+  function renderEmployeeAgentView() {
+    if (!state.agentResult) computeAgentPreset(state.agentPreset || 'client-email');
     const chips = state.lang === 'zh'
       ? [
-          { id: 'client-email', label: '把刚改的上线日期写封更新发给客户' },
-          { id: 'linear-task', label: '在 Linear 建好周四发版任务给 Leo' },
-          { id: 'why-silver', label: '查一下上次为什么选了银色款' }
+          { id: 'client-email', label: '把刚改到 12 月 10 日的上线排期写封客户更新邮件' },
+          { id: 'linear-task', label: '按周二评审结论给 Leo 建好银色样机固件单' },
+          { id: 'why-silver', label: '回溯一下当时为什么选了银色款机身？' }
         ]
       : [
-          { id: 'client-email', label: 'Draft client update for Dec 10 launch shift' },
-          { id: 'linear-task', label: 'Create Thursday Silver build ticket for Leo' },
+          { id: 'client-email', label: 'Draft client email for moving launch to Dec 10' },
+          { id: 'linear-task', label: 'Create Thursday Silver firmware ticket for Leo' },
           { id: 'why-silver', label: 'Why did we pick the Silver finish?' }
         ];
 
     return `
-      <section class="panel section-card">
-        <div class="sc-head">
-          <h2>${t('agentTitle')}</h2>
-          <p>${t('agentDesc')}</p>
-        </div>
-        <form class="agent-form" id="agent-form">
-          <input type="text" id="agent-input" placeholder="${esc(t('agentPlaceholder'))}" autocomplete="off">
-          <button type="submit" class="btn btn-primary">${t('agentRun')}</button>
-        </form>
-        <div class="agent-chips">
-          ${chips.map((c) => `<button type="button" class="agent-chip ${state.agentPreset === c.id ? 'is-active' : ''}" data-agent-preset="${c.id}">${esc(c.label)}</button>`).join('')}
-        </div>
-        ${state.agentResult ? `
-          <div class="agent-draft">
-            <div class="ad-meta">
-              <span>${esc(state.agentResult.citation)}</span>
-              <span>${esc(state.agentResult.channel)}</span>
-            </div>
-            <div class="ad-body">${esc(state.agentResult.body)}</div>
-            <div class="ad-foot">
-              <span>${state.lang === 'zh' ? '基于已确认文字记录生成，未读取原始音频' : 'Grounded in confirmed notes only · No raw audio read'}</span>
-              <button type="button" class="btn btn-primary btn-xs" id="agent-approve-btn" ${state.agentApproved ? 'disabled' : ''}>
-                ${state.agentApproved ? t('agentSent') : t('agentApprove')}
-              </button>
+      <div class="gov-grid">
+        <section class="card-box" style="display:flex;flex-direction:column;gap:14px;">
+          <div class="cb-head" style="margin-bottom:0;">
+            <div>
+              <h2>${state.lang === 'zh' ? '一句话把口头决定交给 Agent' : 'Hand Off Spoken Decisions to Agent'}</h2>
+              <p>${state.lang === 'zh' ? '通过本地 MCP 仅读取已确认的文字决定，不暴露任何原始录音。' : 'Reads confirmed text notes via MCP without exposing raw audio.'}</p>
             </div>
           </div>
-        ` : ''}
-      </section>
-    `;
-  }
 
-  function renderEmployeeAgentView() {
-    return `
-      <div class="int-layout">
-        ${renderAgentCard()}
+          <form id="agent-form" style="display:flex;gap:8px;">
+            <input type="text" id="agent-input" style="flex:1;padding:8px 12px;border-radius:9px;border:0;background:var(--bento);box-shadow:inset 0 0 0 0.5px var(--hair-strong);" placeholder="${state.lang === 'zh' ? '输入指令，例如：帮我把刚定的延期原因发给客户…' : 'Ask Rutta Agent…'}" autocomplete="off">
+            <button type="submit" class="mac-btn mac-btn-primary">${state.lang === 'zh' ? '生成草稿' : 'Generate'}</button>
+          </form>
 
-        <section class="panel section-card">
-          <div class="sc-head">
-            <h2>${state.lang === 'zh' ? '确认后同步去向（团队配置）' : 'Sync Destinations (Workspace Config)'}</h2>
-            <p>${state.lang === 'zh' ? '仅在你点击确认后，文字决定才会推送到以下已启用工具；配置由管理者维护。' : 'Confirmed text notes flow to these active workspace tools.'}</p>
+          <div class="iab-chips">
+            ${chips.map((c) => `<button type="button" class="prompt-pill ${state.agentPreset === c.id ? 'is-active' : ''}" data-agent-preset="${c.id}">${esc(c.label)}</button>`).join('')}
           </div>
-          <div class="tool-rows">
+
+          ${state.agentResult ? `
+            <div class="agent-draft-box">
+              <div class="adb-meta">
+                <span>${esc(state.agentResult.citation)}</span>
+                <span>${esc(state.agentResult.channel)}</span>
+              </div>
+              <div class="adb-body">${esc(state.agentResult.body)}</div>
+              <div class="adb-foot">
+                <span>${state.lang === 'zh' ? '数据源：已确认文字纪要 · 0 原始音频读取' : 'Source: Confirmed text notes · 0 raw audio read'}</span>
+                <button type="button" class="mac-btn mac-btn-primary mac-btn-xs" id="agent-approve-btn" ${state.agentApproved ? 'disabled' : ''}>
+                  ${state.agentApproved ? (state.lang === 'zh' ? '已发出 ✓' : 'Sent ✓') : (state.lang === 'zh' ? '确认并发送' : 'Approve & send')}
+                </button>
+              </div>
+            </div>
+          ` : ''}
+        </section>
+
+        <section class="card-box">
+          <div class="cb-head">
+            <div>
+              <h2>${state.lang === 'zh' ? '已连接的团队流转去向' : 'Connected Workspace Destinations'}</h2>
+              <p>${state.lang === 'zh' ? '只有你在卡片上点击确认后，对应决定才会同步至以下工具。' : 'Notes sync here only after participants confirm.'}</p>
+            </div>
+          </div>
+          <div class="connector-grid">
             ${state.integrations.map((tool) => `
-              <div class="tool-row">
-                <div class="tr-left">
-                  <div class="tool-mark">${esc(tool.letter)}</div>
-                  <div>
-                    <div class="tr-name">${esc(tool.name)}</div>
-                    <div class="tr-desc">${esc(pick(tool.desc))}</div>
-                  </div>
+              <div class="conn-tile">
+                <div class="ct-top">
+                  <span class="ct-icon">${esc(tool.glyph)}</span>
+                  <span class="pill-tag ${tool.enabled ? 'pill-green' : 'pill-neutral'}">${tool.enabled ? (state.lang === 'zh' ? '已连接' : 'Active') : (state.lang === 'zh' ? '已停用' : 'Off')}</span>
                 </div>
-                <div class="tr-right">
-                  <span class="tr-mono">${esc(tool.target)}</span>
-                  <span class="badge ${tool.enabled ? 'badge-green' : 'badge-neutral'}">${tool.enabled ? (state.lang === 'zh' ? '已启用' : 'On') : (state.lang === 'zh' ? '已停用' : 'Off')}</span>
+                <div>
+                  <div class="ct-name">${esc(tool.name)}</div>
+                  <div class="ct-target">${esc(tool.target)}</div>
                 </div>
               </div>
             `).join('')}
@@ -1342,129 +835,348 @@
     `;
   }
 
-  function renderAdminIntegrationsView() {
+  /* =====================================================================
+   * ADMIN VIEW 1: VOICEPRINT CIRCLE & SCULPTURAL SEAT INSPECTOR
+   * ===================================================================== */
+  function renderAdminCircleView() {
+    const activeList = state.members.filter((m) => m.active);
+    const teamVisCount = activeList.filter((m) => m.visibility === 'team').length;
+    const selfOnlyCount = activeList.length - teamVisCount;
+
+    const q = state.vpSearch.trim().toLowerCase();
+    const rows = state.members.filter((m) => {
+      if (state.vpFilter === 'active' && !m.active) return false;
+      if (state.vpFilter === 'paused' && m.active) return false;
+      if (!q) return true;
+      return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || pick(m.role).toLowerCase().includes(q);
+    });
+
+    let inspected = memberById(state.selectedSeatId) || rows[0] || state.members[0];
+    if (inspected) state.selectedSeatId = inspected.id;
+
+    const barStateText = (m) => {
+      if (!m.active) return state.lang === 'zh' ? '声纹已停用' : 'Voiceprint paused';
+      if (m.barState === 'muted') return state.lang === 'zh' ? '物理静音已拨下' : 'Hardware muted';
+      if (m.barState === 'lid_closed') return state.lang === 'zh' ? '合盖持续待机中' : 'Lid-closed standby';
+      return state.lang === 'zh' ? 'USB-C 在线待机' : 'USB-C ready';
+    };
+
     return `
-      <div class="int-layout">
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <section class="panel section-card">
-            <div class="sc-head">
-              <h2>${t('toolsTitle')}</h2>
-              <p>${t('toolsDesc')}</p>
-            </div>
-            <div class="tool-rows">
-              ${state.integrations.map((tool) => `
-                <div class="tool-row">
-                  <div class="tr-left">
-                    <div class="tool-mark">${esc(tool.letter)}</div>
-                    <div>
-                      <div class="tr-name">${esc(tool.name)}</div>
-                      <div class="tr-desc">${esc(pick(tool.desc))}</div>
-                    </div>
-                  </div>
-                  <div class="tr-right">
-                    <span class="tr-mono">${esc(tool.target)}</span>
-                    ${tool.id === 'mcp'
-                      ? `<button type="button" class="btn btn-secondary btn-xs" data-copy-mcp="${tool.target}">${t('btnCopy')}</button>`
-                      : `<button type="button" class="btn btn-secondary btn-xs" data-test-tool="${tool.id}" ${tool.enabled ? '' : 'disabled'}>${t('btnTest')}</button>`
-                    }
-                    <button type="button" class="toggle" role="switch" aria-checked="${tool.enabled}" data-toggle-tool="${tool.id}" aria-label="${esc(tool.name)}"></button>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </section>
-
-          <section class="panel section-card">
-            <div class="sc-head">
-              <h2>${state.lang === 'zh' ? '管理合规日志（仅记录配置，不含对话内容）' : 'Governance Audit Log (Config only · Zero dialogue)'}</h2>
-              <p>${state.lang === 'zh' ? '追踪声纹名录变更与系统自动清理记录，方便团队安全审计。' : 'Tracks roster updates and auto-expiry runs for workspace governance.'}</p>
-            </div>
-            <div class="tool-rows">
-              ${state.auditLogs.map((log) => `
-                <div class="audit-row">
-                  <span>${esc(pick(log.text))}</span>
-                  <span class="audit-time">${esc(pick(log.time))}</span>
-                </div>
-              `).join('')}
-            </div>
-          </section>
+      <!-- Soft Tactile Studio Pulse Bento -->
+      <section class="pulse-bento-grid">
+        <div class="pulse-tile tone-sage">
+          <div class="pt-top">
+            <span>${state.lang === 'zh' ? '声纹圈活跃席位' : 'Active voiceprint circle'}</span>
+            <span class="pill-tag pill-green"><span class="dot dot-ready"></span>${state.lang === 'zh' ? '白名单生效' : 'Gate ON'}</span>
+          </div>
+          <div class="pt-num">${activeList.length}<small>/ ${state.members.length} ${state.lang === 'zh' ? '位成员' : 'seats'}</small></div>
+          <div class="pt-foot">${state.lang === 'zh' ? '仅识别声纹圈内成员，随时支持本人退出销毁' : 'Only enrolled teammates trigger capture'}</div>
         </div>
 
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          <section class="panel section-card">
-            <div class="sc-head">
-              <h2>${t('privacyTitle')}</h2>
-              <p>${t('privacyDesc')}</p>
-            </div>
-            <div class="tool-rows">
-              ${state.policies.map((p) => `
-                <div class="policy-row">
-                  <div>
-                    <div class="pr-name">
-                      <span>${esc(pick(p.title))}</span>
-                      ${p.locked ? `<span class="badge badge-neutral">${ICONS.lock} ${t('lockedBadge')}</span>` : ''}
-                    </div>
-                    <p class="pr-desc">${esc(pick(p.desc))}</p>
-                  </div>
-                  <button type="button" class="toggle" role="switch" aria-checked="${p.enabled}" ${p.locked ? 'disabled' : ''} data-toggle-policy="${p.id}"></button>
-                </div>
-              `).join('')}
-            </div>
-          </section>
-
-          <section class="panel section-card">
-            <div class="sc-head">
-              <h2>${state.lang === 'zh' ? '数据留存与权限摘要' : 'Retention & Access Summary'}</h2>
-            </div>
-            <div class="drawer-kv-list">
-              <div class="drawer-kv-row">
-                <span>${state.lang === 'zh' ? '未匹配 / 拒收语音' : 'Unauthorized / blocked speech'}</span>
-                <span>${state.lang === 'zh' ? '实时丢弃（0 留存）' : 'Dropped immediately (0 saved)'}</span>
-              </div>
-              <div class="drawer-kv-row">
-                <span>${state.lang === 'zh' ? '原声片段自动销毁' : 'Source clip auto-expiry'}</span>
-                <span>${state.lang === 'zh' ? '确认后 7 天自动清理' : '7 days after confirmation'}</span>
-              </div>
-              <div class="drawer-kv-row">
-                <span>${state.lang === 'zh' ? '跨设备收录控制权' : 'Peer-capture override'}</span>
-                <span>${state.lang === 'zh' ? '仅员工本人（管理者只读）' : 'Employee only (Admin read-only)'}</span>
-              </div>
-            </div>
-          </section>
+        <div class="pulse-tile tone-cool">
+          <div class="pt-top">
+            <span>${state.lang === 'zh' ? '小会跨设备可见性分布' : 'Huddle peer-capture visibility'}</span>
+            <span class="pill-tag pill-neutral">${ICONS.lock} ${state.lang === 'zh' ? '员工自决' : 'Member-set'}</span>
+          </div>
+          <div class="pt-num">${teamVisCount}<small>${state.lang === 'zh' ? `位团队互通 · ${selfOnlyCount} 位仅本机` : `Team Bars · ${selfOnlyCount} Self-only`}</small></div>
+          <div class="pt-foot">${state.lang === 'zh' ? '成员可在菜单栏随时切为「仅我的 Mac」，管理员不可代开' : 'Set by each member in their menu bar'}</div>
         </div>
+
+        <div class="pulse-tile tone-warm">
+          <div class="pt-top">
+            <span>${state.lang === 'zh' ? '今日已静默忽略未授权语音' : 'Unauthorized speech dropped'}</span>
+            <span class="pill-tag pill-neutral">${state.lang === 'zh' ? '0 秒落盘' : '0 saved'}</span>
+          </div>
+          <div class="pt-num">${state.blockedToday}<small>${state.lang === 'zh' ? '次不亮灯丢弃' : 'dropped today'}</small></div>
+          <div class="pt-foot">${state.lang === 'zh' ? '涵盖外部来访客户与设为「仅本机」的同事发言' : 'Includes visitors & self-only teammates'}</div>
+        </div>
+      </section>
+
+      <!-- Left Voiceprint Roster + Right Sculptural MacBook Air Seat Inspector -->
+      <section class="circle-workspace">
+        <div class="seat-list-card">
+          <div class="sl-toolbar">
+            <div class="mf-tabs">
+              <button type="button" class="mf-tab ${state.vpFilter === 'all' ? 'is-active' : ''}" data-vp-filter="all">${state.lang === 'zh' ? '全部席位' : 'All'} (${state.members.length})</button>
+              <button type="button" class="mf-tab ${state.vpFilter === 'active' ? 'is-active' : ''}" data-vp-filter="active">${state.lang === 'zh' ? '活跃中' : 'Active'}</button>
+              <button type="button" class="mf-tab ${state.vpFilter === 'paused' ? 'is-active' : ''}" data-vp-filter="paused">${state.lang === 'zh' ? '已暂停' : 'Paused'}</button>
+            </div>
+            <div class="mac-search">
+              ${ICONS.search}
+              <input type="search" id="vp-search-input" value="${esc(state.vpSearch)}" placeholder="${state.lang === 'zh' ? '搜索成员或岗位…' : 'Filter teammates…'}">
+            </div>
+          </div>
+
+          <div class="seat-rows">
+            ${rows.length === 0
+              ? `<div style="padding:36px;text-align:center;color:var(--muted);">${state.lang === 'zh' ? '未找到匹配成员' : 'No matching teammates'}</div>`
+              : rows.map((m) => `
+                <div class="seat-row ${inspected && inspected.id === m.id ? 'is-selected' : ''} ${m.active ? '' : 'is-paused'}" data-select-seat="${m.id}">
+                  <div class="sr-person">
+                    ${renderAvatar(m)}
+                    <div style="min-width:0;">
+                      <div class="sr-name">${esc(m.name)}</div>
+                      <div class="sr-meta">
+                        <i class="sw sw-${m.finish}" style="width:8px;height:8px;"></i>
+                        <span>${esc(pick(m.role))} · ${finishLabel(m.finish)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="sr-wave" aria-hidden="true">
+                    ${m.bars.slice(0, 10).map((h) => `<span style="height:${Math.round(h * 0.17)}px"></span>`).join('')}
+                  </div>
+
+                  <div>${visibilityBadge(m)}</div>
+
+                  <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;" onclick="event.stopPropagation()">
+                    <button type="button" class="mac-switch" role="switch" aria-checked="${m.active}" data-toggle-member="${m.id}" aria-label="${esc(m.name)}"></button>
+                  </div>
+                </div>
+              `).join('')
+            }
+          </div>
+        </div>
+
+        ${inspected ? `
+          <aside class="seat-inspector">
+            <div class="si-stage">
+              <img src="${mountedPhoto(inspected.finish)}" alt="${finishLabel(inspected.finish)} Rutta Bar">
+              <div class="si-overlay-bar">
+                <span style="display:inline-flex;align-items:center;gap:6px;">
+                  <span class="dot ${!inspected.active ? 'dot-paused' : inspected.barState === 'muted' ? 'dot-mute' : 'dot-ready'}"></span>
+                  <span>${esc(inspected.name)} · ${finishLabel(inspected.finish)} Bar</span>
+                </span>
+                <span style="color:var(--muted);font-size:11px;">${barStateText(inspected)}</span>
+              </div>
+            </div>
+
+            <div class="kv-box">
+              <div class="kv-line">
+                <span>${state.lang === 'zh' ? '工作邮箱' : 'Work email'}</span>
+                <span>${esc(inspected.email)}</span>
+              </div>
+              <div class="kv-line">
+                <span>${state.lang === 'zh' ? '最近声纹匹配' : 'Last recognized'}</span>
+                <span>${esc(pick(inspected.lastHeard))}</span>
+              </div>
+              <div class="kv-line">
+                <span>${state.lang === 'zh' ? '跨设备收录可见性' : 'Huddle visibility'}</span>
+                <span>${visibilityBadge(inspected)}</span>
+              </div>
+              <div class="kv-line">
+                <span>${state.lang === 'zh' ? '权限归属' : 'Control ownership'}</span>
+                <span style="color:var(--muted);font-weight:500;">${state.lang === 'zh' ? '员工本人控制 · 管理员只读' : 'Employee-owned (read-only)'}</span>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:7px;flex-wrap:wrap;">
+              ${(inspected.id === 'leo' || inspected.id === 'maya') ? `
+                <button type="button" class="mac-btn mac-btn-subtle mac-btn-xs" style="flex:1;" data-jump-emp="${inspected.id}">
+                  <span>${state.lang === 'zh' ? `切到 ${inspected.name.split(' ')[0]} 个人视角` : `Open ${inspected.name.split(' ')[0]}’s view`}</span>
+                  ${ICONS.ext}
+                </button>
+              ` : ''}
+              <button type="button" class="mac-btn mac-btn-subtle mac-btn-xs" style="flex:1;" data-reenroll-seat="${inspected.id}">${state.lang === 'zh' ? '重新校准声纹' : 'Recalibrate'}</button>
+              <button type="button" class="mac-btn mac-btn-ghost mac-btn-xs" style="color:var(--red);" data-delete-member="${inspected.id}">${state.lang === 'zh' ? '销毁声纹' : 'Remove'}</button>
+            </div>
+          </aside>
+        ` : ''}
+      </section>
+    `;
+  }
+
+  /* =====================================================================
+   * ADMIN VIEW 2: TEAM DECISION FLOW (PRIVACY-SCOPED OUTCOMES)
+   * ===================================================================== */
+  function renderAdminFlowView() {
+    const visibleList = adminDecisions();
+    const hiddenDrafts = state.decisions.filter((d) => d.status === 'pending').length;
+    const mondayCnt = visibleList.filter((d) => d.status === 'monday').length;
+    const list = visibleList.filter((d) => state.decFilter === 'all' || d.status === state.decFilter);
+    let selected = list.find((d) => d.id === state.selectedDecisionId) || list[0] || null;
+    if (selected) state.selectedDecisionId = selected.id;
+
+    return `
+      <div class="ambient-strip" style="background:var(--bento-cool);">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="ev-lock-orb" style="width:30px;height:30px;border-radius:8px;">${ICONS.shield}</span>
+          <div>
+            <div style="font-weight:630;font-size:12.5px;">${state.lang === 'zh'
+              ? `团队脱敏看板：${hiddenDrafts} 条未确认私密讨论已自动隐藏，所有原始音频均对管理者加密隔离`
+              : `Privacy-scoped board: ${hiddenDrafts} unconfirmed drafts are hidden and all original voice clips stay locked`}</div>
+            <div style="font-size:11.5px;color:var(--muted);">${state.lang === 'zh'
+              ? '这里仅汇总已获在场双方确认的正式团队决定与待认领跟进项，避免管理后台演变为录音监控工具。'
+              : 'Surfaces confirmed team commitments and unassigned follow-ups—never raw surveillance audio.'}</div>
+          </div>
+        </div>
+        <button type="button" class="mac-btn mac-btn-subtle mac-btn-xs" id="btn-compare-emp-today">
+          <span>${state.lang === 'zh' ? '对比员工端视图' : 'Compare Employee view'}</span>
+          ${ICONS.ext}
+        </button>
+      </div>
+
+      <section class="memory-workspace">
+        <div class="memory-feed">
+          <div class="mf-head">
+            <div class="mf-tabs">
+              <button type="button" class="mf-tab ${state.decFilter === 'all' ? 'is-active' : ''}" data-dec-filter="all">${state.lang === 'zh' ? '全部公开项' : 'All'} (${visibleList.length})</button>
+              <button type="button" class="mf-tab ${state.decFilter === 'synced' ? 'is-active' : ''}" data-dec-filter="synced">${state.lang === 'zh' ? '已同步' : 'Synced'}</button>
+              <button type="button" class="mf-tab ${state.decFilter === 'monday' ? 'is-active' : ''}" data-dec-filter="monday">${state.lang === 'zh' ? '待认领' : 'Follow-up'} (${mondayCnt})</button>
+            </div>
+          </div>
+          <div class="mf-list">
+            ${list.map((d) => {
+              const owner = memberById(d.ownerId);
+              return `
+                <button type="button" class="mf-card ${selected && selected.id === d.id ? 'is-selected' : ''}" data-select-dec="${d.id}">
+                  <div class="mfc-top">
+                    <span class="mfc-time"><span class="dot ${d.status === 'synced' ? 'dot-ready' : 'dot-paused'}"></span>${esc(pick(d.context))}</span>
+                  </div>
+                  <div class="mfc-title">${esc(pick(d.title))}</div>
+                  <div class="mfc-foot">
+                    <span class="mfc-via">${owner ? esc(owner.name) : (state.lang === 'zh' ? '暂未认领负责人' : 'Unassigned')}</span>
+                    <span class="mfc-via">${esc(pick(d.due))}</span>
+                  </div>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <div class="note-canvas">
+          ${selected ? renderDecisionNote(selected, true) : ''}
+        </div>
+      </section>
+    `;
+  }
+
+  /* =====================================================================
+   * ADMIN VIEW 3: CONNECTORS, MULTI-BAR SYNC STAGE & PRIVACY GUARDRAILS
+   * ===================================================================== */
+  function renderAdminConnectionsView() {
+    const fleet = state.members.slice(0, 4);
+
+    return `
+      <!-- Multi-Bar Desk Sync & Visitor Gate Live Stage -->
+      <section class="card-box" style="margin-bottom:16px;">
+        <div class="cb-head" style="margin-bottom:4px;">
+          <div>
+            <h2>${state.multiBarSync
+              ? (state.lang === 'zh' ? '多机协同实况：3 台邻近 MacBook Air 正在同频拾取同一场讨论，自动合并为 1 条记录' : 'Live Sync: 3 nearby MacBook Airs capturing one huddle — deduplicated into 1 note')
+              : state.visitorGateDemo
+                ? (state.lang === 'zh' ? '门禁拦截实况：检测到未入圈外部访客发言，全部设备顶灯保持熄灭（0 留存）' : 'Gate Active: Unenrolled visitor speaking — all LEDs stay dark with 0 storage')
+                : (state.lang === 'zh' ? '工位硬件场实况（4 台已配对 Rutta Bar）' : 'Studio Hardware Fleet (4 Paired Rutta Bars)')}</h2>
+            <p>${state.lang === 'zh' ? '插在 MacBook Air 左侧 USB-C 口即插即用；多人围坐时自动去重，不会向 Linear 重复推送多份待办。' : 'Plug-and-play on MacBook Air USB-C; nearby Bars automatically deduplicate shared huddles.'}</p>
+          </div>
+        </div>
+
+        <div class="fleet-mini-grid">
+          ${fleet.map((m, idx) => {
+            const isSync = state.multiBarSync && idx < 3;
+            const isMuted = !isSync && m.barState === 'muted';
+            const dot = isSync ? 'dot-input' : isMuted ? 'dot-mute' : state.visitorGateDemo ? 'dot-visitor' : 'dot-ready';
+            const tag = isSync
+              ? `<span class="pill-tag pill-amber">${state.lang === 'zh' ? '同频去重' : 'Synced'}</span>`
+              : isMuted
+                ? `<span class="pill-tag pill-orange">${state.lang === 'zh' ? '物理静音' : 'Muted'}</span>`
+                : state.visitorGateDemo
+                  ? `<span class="pill-tag pill-neutral">${state.lang === 'zh' ? '灯不亮' : 'Dark'}</span>`
+                  : `<span class="pill-tag pill-green">${m.barState === 'lid_closed' ? (state.lang === 'zh' ? '合盖待机' : 'Lid closed') : (state.lang === 'zh' ? '在线' : 'Ready')}</span>`;
+
+            return `
+              <div class="fleet-mini-card ${isSync ? 'is-sync' : ''}">
+                <img class="fmc-img" src="${mountedPhoto(m.finish)}" alt="${finishLabel(m.finish)}">
+                <div class="fmc-name">
+                  <span style="display:inline-flex;align-items:center;gap:5px;"><span class="dot ${dot}"></span>${esc(m.name.split(' ')[0])}</span>
+                  ${tag}
+                </div>
+                <div class="fmc-sub">${finishLabel(m.finish)} · ${m.visibility === 'team' ? (state.lang === 'zh' ? '小会互通' : 'Team Bars') : (state.lang === 'zh' ? '仅限本机' : 'My Mac Only')}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </section>
+
+      <div class="gov-grid">
+        <section class="card-box">
+          <div class="cb-head">
+            <div>
+              <h2>${state.lang === 'zh' ? '团队工作流连接器与开放 MCP' : 'Workspace Connectors & Open MCP'}</h2>
+              <p>${state.lang === 'zh' ? '当事成员点击确认后，结构化结论自动推送至对应项目与桌面端 Agent。' : 'Confirmed commitments route into your existing tools and MCP Agents.'}</p>
+            </div>
+          </div>
+
+          <div class="connector-grid">
+            ${state.integrations.map((tool) => `
+              <div class="conn-tile">
+                <div class="ct-top">
+                  <span class="ct-icon">${esc(tool.glyph)}</span>
+                  <button type="button" class="mac-switch" role="switch" aria-checked="${tool.enabled}" data-toggle-tool="${tool.id}" aria-label="${esc(tool.name)}"></button>
+                </div>
+                <div>
+                  <div class="ct-name">${esc(tool.name)}</div>
+                  <div class="ct-target">${esc(tool.target)}</div>
+                  <p style="font-size:11.5px;color:var(--ink-2);margin-top:4px;">${esc(pick(tool.desc))}</p>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </section>
+
+        <section class="card-box">
+          <div class="cb-head">
+            <div>
+              <h2>${state.lang === 'zh' ? '团队隐私与防监控围栏' : 'Anti-Surveillance Privacy Guardrails'}</h2>
+              <p>${state.lang === 'zh' ? '核心底线由硬件与协议层强制锁定，管理员亦不可关闭。' : 'Core boundaries are protocol-locked and cannot be disabled by admins.'}</p>
+            </div>
+          </div>
+
+          <div>
+            ${state.policies.map((p) => `
+              <div class="guardrail-row">
+                <div>
+                  <div class="gr-title">
+                    <span>${esc(pick(p.title))}</span>
+                    ${p.locked ? `<span class="pill-tag pill-neutral">${ICONS.lock} ${state.lang === 'zh' ? '系统锁死' : 'Locked'}</span>` : ''}
+                  </div>
+                  <p class="gr-desc">${esc(pick(p.desc))}</p>
+                </div>
+                <button type="button" class="mac-switch" role="switch" aria-checked="${p.enabled}" ${p.locked ? 'disabled' : ''} data-toggle-policy="${p.id}"></button>
+              </div>
+            `).join('')}
+          </div>
+        </section>
       </div>
     `;
   }
 
   /* =====================================================================
-   * RENDER ORCHESTRATION & BINDINGS
+   * RENDER DISPATCH & INTERACTION WIRING
    * ===================================================================== */
   function renderCurrentView() {
     const root = $('#view-container');
     if (state.roleMode === 'employee') {
-      if (state.activeTab === 'my-voice') {
-        root.innerHTML = renderEmployeeVoiceView();
-        bindEmployeeVoiceEvents(root);
-      } else if (state.activeTab === 'my-decisions') {
-        root.innerHTML = renderDecisionsView(false);
-        bindDecisionsEvents(root);
+      if (state.activeTab === 'today') {
+        root.innerHTML = renderEmployeeTodayView();
+        bindMemoryEvents(root);
+      } else if (state.activeTab === 'my-bar') {
+        root.innerHTML = renderEmployeeBarView();
+        bindEmployeeBarEvents(root);
       } else {
         root.innerHTML = renderEmployeeAgentView();
-        bindIntegrationsEvents(root);
+        bindAgentEvents(root);
       }
     } else {
-      if (state.activeTab === 'voiceprints') {
-        root.innerHTML = renderAdminVoiceprintsView();
-        bindAdminVoiceprintsEvents(root);
-      } else if (state.activeTab === 'decisions') {
-        root.innerHTML = renderDecisionsView(true);
-        bindDecisionsEvents(root);
-      } else if (state.activeTab === 'devices') {
-        root.innerHTML = renderAdminDevicesView();
-        bindDevicesEvents(root);
+      if (state.activeTab === 'circle') {
+        root.innerHTML = renderAdminCircleView();
+        bindAdminCircleEvents(root);
+      } else if (state.activeTab === 'team-flow') {
+        root.innerHTML = renderAdminFlowView();
+        bindMemoryEvents(root);
       } else {
-        root.innerHTML = renderAdminIntegrationsView();
-        bindIntegrationsEvents(root);
+        root.innerHTML = renderAdminConnectionsView();
+        bindConnectionsEvents(root);
       }
     }
   }
@@ -1474,12 +1186,166 @@
     renderCurrentView();
   }
 
-  function bindAdminVoiceprintsEvents(root) {
-    $('#jump-emp-consent', root)?.addEventListener('click', () => {
-      state.currentEmployeeId = 'leo';
-      switchRole('employee', 'my-voice');
+  function bindMemoryEvents(root) {
+    const emp = currentEmployee();
+
+    $$('[data-vis]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        setEmployeeVisibility(emp, b.dataset.vis, true);
+        if (b.dataset.vis === 'self') showPrivacyBanner('peer');
+      });
     });
 
+    $$('[data-dec-filter]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        stopQuotePlayback();
+        state.decFilter = b.dataset.decFilter;
+        renderCurrentView();
+      });
+    });
+
+    $$('[data-select-dec]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        stopQuotePlayback();
+        state.selectedDecisionId = b.dataset.selectDec;
+        renderCurrentView();
+      });
+    });
+
+    $$('[data-confirm-part]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        const [did, mid] = b.dataset.confirmPart.split(':');
+        toggleConfirm(did, mid, false);
+      });
+    });
+
+    $$('[data-play-quote]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        const id = b.dataset.playQuote;
+        if (playingQuoteId === id) { stopQuotePlayback(); renderCurrentView(); }
+        else startQuotePlayback(id);
+      });
+    });
+
+    $$('[data-assign-owner]', root).forEach((sel) => {
+      sel.addEventListener('change', (e) => {
+        const mid = e.target.value;
+        if (!mid) return;
+        const dec = state.decisions.find((d) => d.id === sel.dataset.assignOwner);
+        const m = memberById(mid);
+        if (!dec || !m) return;
+        dec.ownerId = mid;
+        dec.status = 'synced';
+        showToast(state.lang === 'zh' ? `已指派给 ${m.name} 并推送至 Linear` : `Assigned to ${m.name} & pushed to Linear`);
+        renderAll();
+      });
+    });
+
+    $$('[data-inline-agent]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        const [did, preset] = b.dataset.inlineAgent.split(':');
+        state.inlineAgentDecId = did;
+        computeAgentPreset(preset);
+        renderCurrentView();
+      });
+    });
+
+    $('#inline-agent-send', root)?.addEventListener('click', () => {
+      state.agentApproved = true;
+      renderCurrentView();
+      showToast(state.lang === 'zh' ? '已发送草稿并归档记录' : 'Sent & archived');
+    });
+
+    $$('[data-delete-dec]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        const idx = state.decisions.findIndex((d) => d.id === b.dataset.deleteDec);
+        if (idx === -1) return;
+        lastDeletedDecision = { item: state.decisions.splice(idx, 1)[0], idx };
+        state.selectedDecisionId = state.decisions[0]?.id || null;
+        renderAll();
+        showToast(state.lang === 'zh' ? '已销毁该段记录与原声' : 'Note & source clip destroyed', t('undo'), () => {
+          if (lastDeletedDecision) {
+            state.decisions.splice(lastDeletedDecision.idx, 0, lastDeletedDecision.item);
+            state.selectedDecisionId = lastDeletedDecision.item.id;
+            lastDeletedDecision = null;
+            renderAll();
+          }
+        });
+      });
+    });
+
+    $('#btn-demo-switch-listener', root)?.addEventListener('click', () => {
+      state.currentEmployeeId = 'maya';
+      switchRole('employee', 'today');
+    });
+
+    $('#btn-compare-emp-today', root)?.addEventListener('click', () => {
+      state.currentEmployeeId = 'leo';
+      switchRole('employee', 'today');
+    });
+  }
+
+  function bindEmployeeBarEvents(root) {
+    const emp = currentEmployee();
+    $$('[data-stage-view]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        state.hwStageView = b.dataset.stageView;
+        renderCurrentView();
+      });
+    });
+    $('#btn-stage-mute', root)?.addEventListener('click', () => {
+      emp.barState = emp.barState === 'muted' ? 'online' : 'muted';
+      playSwitchClick(emp.barState === 'muted');
+      renderAll();
+    });
+    $('#emp-lid-switch', root)?.addEventListener('click', () => {
+      emp.lidStandby = !emp.lidStandby;
+      renderCurrentView();
+    });
+    $$('[data-pick-vis]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        setEmployeeVisibility(emp, b.dataset.pickVis, true);
+        if (b.dataset.pickVis === 'self') showPrivacyBanner('peer');
+      });
+    });
+    $('#emp-reenroll-btn', root)?.addEventListener('click', () => openEnrollModal(emp.id));
+    $('#emp-test-peer-banner', root)?.addEventListener('click', () => {
+      if (emp.visibility === 'team') showDecisionBanner('dec-launch');
+      else showPrivacyBanner('peer');
+    });
+  }
+
+  function bindAgentEvents(root) {
+    $('#agent-form', root)?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const val = $('#agent-input', root).value.trim();
+      if (!val) return;
+      state.agentPreset = null;
+      state.agentApproved = false;
+      const dec = state.decisions[0];
+      state.agentResult = {
+        channel: state.lang === 'zh' ? 'MCP 草稿' : 'MCP Draft',
+        citation: state.lang === 'zh' ? `引用决定：${pick(dec.title)}` : `Cited: ${pick(dec.title)}`,
+        body: state.lang === 'zh'
+          ? `已根据指令「${val}」结合已确认口头决定生成：\n\n• 事项：${pick(dec.title)}\n• 负责人：${memberById(dec.ownerId)?.name || '待认领'} · 截止：${pick(dec.due)}`
+          : `Draft for "${val}":\n\n• Decision: ${pick(dec.title)}\n• Owner: ${memberById(dec.ownerId)?.name || 'Unassigned'} · Due: ${pick(dec.due)}`
+      };
+      renderCurrentView();
+    });
+    $$('[data-agent-preset]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        computeAgentPreset(b.dataset.agentPreset);
+        renderCurrentView();
+      });
+    });
+    $('#agent-approve-btn', root)?.addEventListener('click', () => {
+      state.agentApproved = true;
+      renderCurrentView();
+      showToast(state.lang === 'zh' ? '已发出并归档' : 'Sent & logged');
+    });
+  }
+
+  function bindAdminCircleEvents(root) {
     const input = $('#vp-search-input', root);
     if (input) {
       input.addEventListener('input', (e) => {
@@ -1490,142 +1356,40 @@
         if (next) { next.focus(); next.setSelectionRange(pos, pos); }
       });
     }
-
     $$('[data-vp-filter]', root).forEach((b) => {
       b.addEventListener('click', () => { state.vpFilter = b.dataset.vpFilter; renderCurrentView(); });
     });
-    $$('[data-open-member]', root).forEach((tr) => {
-      tr.addEventListener('click', () => renderMemberDrawer(tr.dataset.openMember));
+    $$('[data-select-seat]', root).forEach((row) => {
+      row.addEventListener('click', () => { state.selectedSeatId = row.dataset.selectSeat; renderCurrentView(); });
     });
-    $$('[data-inspect-member]', root).forEach((b) => {
-      b.addEventListener('click', () => renderMemberDrawer(b.dataset.inspectMember));
-    });
-    $$('[data-toggle-member]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        const m = memberById(b.dataset.toggleMember);
+    $$('[data-toggle-member]', root).forEach((sw) => {
+      sw.addEventListener('click', () => {
+        const m = memberById(sw.dataset.toggleMember);
         if (!m) return;
         m.active = !m.active;
         showToast(state.lang === 'zh' ? `${m.name} 声纹已${m.active ? '启用' : '暂停'}` : `${m.name} ${m.active ? 'enabled' : 'paused'}`);
         renderAll();
       });
     });
+    $$('[data-jump-emp]', root).forEach((b) => {
+      b.addEventListener('click', () => {
+        state.currentEmployeeId = b.dataset.jumpEmp;
+        switchRole('employee', 'my-bar');
+      });
+    });
+    $$('[data-reenroll-seat]', root).forEach((b) => {
+      b.addEventListener('click', () => openEnrollModal(b.dataset.reenrollSeat));
+    });
     $$('[data-delete-member]', root).forEach((b) => {
       b.addEventListener('click', () => openDeleteModal(b.dataset.deleteMember));
     });
   }
 
-  function bindDecisionsEvents(root) {
-    $('#btn-jump-emp-dec', root)?.addEventListener('click', () => {
-      state.currentEmployeeId = 'leo';
-      switchRole('employee', 'my-decisions');
-    });
-    $$('[data-dec-filter]', root).forEach((b) => {
-      b.addEventListener('click', () => { stopQuotePlayback(); state.decFilter = b.dataset.decFilter; renderCurrentView(); });
-    });
-    $$('[data-select-dec]', root).forEach((b) => {
-      b.addEventListener('click', () => { stopQuotePlayback(); state.selectedDecisionId = b.dataset.selectDec; renderCurrentView(); });
-    });
-    $$('[data-confirm-part]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        const [did, mid] = b.dataset.confirmPart.split(':');
-        toggleConfirm(did, mid, false);
-      });
-    });
-    $$('[data-play-quote]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        const id = b.dataset.playQuote;
-        if (playingQuoteId === id) { stopQuotePlayback(); renderCurrentView(); }
-        else startQuotePlayback(id);
-      });
-    });
-    $$('[data-assign-owner]', root).forEach((sel) => {
-      sel.addEventListener('change', (e) => {
-        const mid = e.target.value;
-        if (!mid) return;
-        const dec = state.decisions.find((d) => d.id === sel.dataset.assignOwner);
-        const m = memberById(mid);
-        if (!dec || !m) return;
-        dec.ownerId = mid;
-        dec.status = 'synced';
-        showToast(state.lang === 'zh' ? `已指派给 ${m.name} 并同步 Linear` : `Assigned to ${m.name} & synced to Linear`);
-        renderAll();
-      });
-    });
-    $$('[data-handoff-dec]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        const dec = state.decisions.find((d) => d.id === b.dataset.handoffDec);
-        if (!dec) return;
-        state.activeTab = 'my-agent';
-        renderAll();
-        runAgentCustom(state.lang === 'zh' ? `基于「${pick(dec.title)}」起草团队同步` : `Draft update for "${pick(dec.title)}"`, dec);
-      });
-    });
-    $$('[data-delete-dec]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        const idx = state.decisions.findIndex((d) => d.id === b.dataset.deleteDec);
-        if (idx === -1) return;
-        lastDeletedDecision = { item: state.decisions.splice(idx, 1)[0], idx };
-        state.selectedDecisionId = state.decisions[0]?.id || null;
-        renderAll();
-        showToast(state.lang === 'zh' ? '已删除该条记录并销毁关联原话' : 'Record & source clip destroyed', t('undo'), () => {
-          if (lastDeletedDecision) {
-            state.decisions.splice(lastDeletedDecision.idx, 0, lastDeletedDecision.item);
-            state.selectedDecisionId = lastDeletedDecision.item.id;
-            lastDeletedDecision = null;
-            renderAll();
-          }
-        });
-      });
-    });
-  }
-
-  function bindDevicesEvents(root) {
-    $('#hw-switch-hotspot', root)?.addEventListener('click', () => {
-      setHardwareState(state.hwState === 'mute' ? 'ready' : 'mute');
-    });
-    $$('[data-diag]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        const mode = b.dataset.diag;
-        setHardwareState(mode);
-        if (mode === 'visitor') showPrivacyNotice(false);
-      });
-    });
-    $('#btn-toggle-lid', root)?.addEventListener('click', () => {
-      state.lidClosed = !state.lidClosed;
-      renderCurrentView();
-    });
-  }
-
-  function bindIntegrationsEvents(root) {
-    $('#agent-form', root)?.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const val = $('#agent-input', root).value.trim();
-      if (val) runAgentCustom(val);
-    });
-    $$('[data-agent-preset]', root).forEach((b) => b.addEventListener('click', () => runAgentPreset(b.dataset.agentPreset)));
-    $('#agent-approve-btn', root)?.addEventListener('click', () => {
-      state.agentApproved = true;
-      renderCurrentView();
-      showToast(state.lang === 'zh' ? '已发送并归档' : 'Sent & logged');
-    });
+  function bindConnectionsEvents(root) {
     $$('[data-toggle-tool]', root).forEach((b) => {
       b.addEventListener('click', () => {
         const tool = state.integrations.find((x) => x.id === b.dataset.toggleTool);
-        if (!tool) return;
-        tool.enabled = !tool.enabled;
-        renderCurrentView();
-      });
-    });
-    $$('[data-test-tool]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        const tool = state.integrations.find((x) => x.id === b.dataset.testTool);
-        if (tool) showToast(state.lang === 'zh' ? `已向 ${tool.name} 发送测试同步` : `Sent test sync to ${tool.name}`);
-      });
-    });
-    $$('[data-copy-mcp]', root).forEach((b) => {
-      b.addEventListener('click', () => {
-        navigator.clipboard?.writeText(b.dataset.copyMcp).catch(() => {});
-        showToast(state.lang === 'zh' ? '已复制 MCP 地址' : 'Copied MCP URI');
+        if (tool) { tool.enabled = !tool.enabled; renderCurrentView(); }
       });
     });
     $$('[data-toggle-policy]', root).forEach((b) => {
@@ -1636,19 +1400,19 @@
     });
   }
 
-  /* ---------- Actions ---------- */
-  function toggleConfirm(decisionId, memberId, fromNotice) {
-    const dec = state.decisions.find((d) => d.id === decisionId);
+  /* ---------- Core Helpers ---------- */
+  function toggleConfirm(decId, memberId, fromBanner) {
+    const dec = state.decisions.find((d) => d.id === decId);
     if (!dec) return;
     const part = dec.participants.find((p) => p.memberId === memberId);
     if (!part) return;
     part.confirmed = !part.confirmed;
     if (dec.participants.every((p) => p.confirmed)) {
       dec.status = 'synced';
-      showToast(state.lang === 'zh' ? '双方已确认，同步至团队空间与 Linear / Notion / Slack' : 'Confirmed & synced to workspace tools');
+      showToast(state.lang === 'zh' ? '双方已确认，已自动推送至 Linear / Notion / Slack' : 'Confirmed & pushed to Linear, Notion, and Slack');
     }
     renderAll();
-    if (fromNotice) showDecisionNotice(decisionId);
+    if (fromBanner) showDecisionBanner(decId);
   }
 
   function stopQuotePlayback() {
@@ -1658,61 +1422,61 @@
     quotePlayPct = 0;
   }
 
-  function startQuotePlayback(decisionId) {
+  function startQuotePlayback(decId) {
     stopQuotePlayback();
-    playingQuoteId = decisionId;
+    playingQuoteId = decId;
     quotePlayPct = 0;
     renderCurrentView();
     quotePlayTimer = setInterval(() => {
-      quotePlayPct += 0.04;
+      quotePlayPct += 0.045;
       if (quotePlayPct >= 1) { stopQuotePlayback(); renderCurrentView(); return; }
-      const wave = $(`#qd-wave-${decisionId}`);
-      const timeEl = $(`#qd-time-${decisionId}`);
-      const dec = state.decisions.find((d) => d.id === decisionId);
+      const wave = $(`#qd-wave-${decId}`);
+      const timeEl = $(`#qd-time-${decId}`);
+      const dec = state.decisions.find((d) => d.id === decId);
       if (wave) {
         const bars = $$('span', wave);
         bars.forEach((b, i) => b.classList.toggle('is-played', (i / bars.length) <= quotePlayPct));
       }
       if (timeEl && dec) timeEl.textContent = formatClipTime(dec.quoteDuration, quotePlayPct);
-    }, 150);
+    }, 140);
   }
 
-  function runAgentPreset(presetId) {
+  function computeAgentPreset(presetId) {
     const map = {
       'client-email': {
         zh: {
-          channel: '邮件草稿 · Gmail',
-          citation: '引用决定：上线日期推迟至 12 月 10 日（Maya & Leo · 14:19）',
-          body: 'Hi 各位，\n\n刚与工程侧对齐，为了让回归测试更充分，我们将上线日期从 12 月 3 日调整至 12 月 10 日。Leo 已同步顺延 Linear 里程碑（RUT-48）及发布计划。\n\n如有外部日程需要同步调整，随时告诉我。\n— Maya'
+          channel: '邮件草稿 · Apple Mail / Gmail',
+          citation: '引用已确认讨论：上线日期顺延至 12 月 10 日（Maya & Leo · 14:19）',
+          body: 'Hi 各位，\n\n刚与工程侧对齐，为留出完整一周完成最终回归与固件压测，我们将目标上线日由 12 月 3 日顺延至 12 月 10 日。Leo 已同步更新 Linear 里程碑（RUT-48）与发布排期。\n\n如有外部节奏需要协同调整，随时告诉我。\n— Maya'
         },
         en: {
-          channel: 'Email draft · Gmail',
-          citation: 'Cited: Move launch from Dec 3 to Dec 10 (Maya & Leo · 14:19)',
-          body: 'Hi team,\n\nAfter syncing with engineering, we are moving our target launch from Dec 3 to Dec 10 to give final QA a clean week. Leo has updated the Linear milestone (RUT-48) and release schedule.\n\nLet us know if any external timelines need adjusting.\n— Maya'
+          channel: 'Email Draft · Apple Mail / Gmail',
+          citation: 'Cited: Move target launch to Dec 10 (Maya & Leo · 14:19)',
+          body: 'Hi team,\n\nAfter syncing with engineering, we are moving our target launch from Dec 3 to Dec 10 to give final regression testing a clean week. Leo has updated Linear milestone RUT-48 and the release calendar.\n\nLet me know if any external schedules need adjusting.\n— Maya'
         }
       },
       'linear-task': {
         zh: {
-          channel: '任务草稿 · Linear',
-          citation: '引用决定：周五测试采用银色样机（Maya & Leo · 10:42）',
-          body: '[RUT-54] 准备周五银色样机测试固件\n负责人：Leo Park · 截止：周四 12:00\n说明：设计评审确定首轮测试使用银色机身，周四中午前同步测试小组。'
+          channel: '任务单草稿 · Linear',
+          citation: '引用已归档决定：周五首轮测试采用银色样机（Maya & Leo）',
+          body: '[RUT-54] 交付周五银色样机用户测试固件\n负责人：Leo Park · 截止：周四 12:00\n上下文：硬件评审选定银色阳极氧化铝机身，周四中午前同步测试包。'
         },
         en: {
-          channel: 'Issue draft · Linear',
-          citation: 'Cited: Use Silver prototype Friday (Maya & Leo · 10:42)',
-          body: '[RUT-54] Deliver Silver prototype test build\nOwner: Leo Park · Due: Thu 12:00\nContext: First round of Friday user testing uses the Silver unit.'
+          channel: 'Issue Draft · Linear',
+          citation: 'Cited: Use Silver prototype for Friday test (Maya & Leo)',
+          body: '[RUT-54] Ship Silver prototype firmware build\nOwner: Leo Park · Due: Thu 12:00\nContext: Hardware review selected the Silver shell for Friday’s user test.'
         }
       },
       'why-silver': {
         zh: {
-          channel: '知识库溯源 · MCP',
-          citation: '命中 3 天前设计评审记录（10:42）',
-          body: '对比四款阳极氧化配色后，团队认为银色与 MacBook Air 侧边融合度最高，且 Leo 周四中午前可先交付银色测试包。该决定已归档至 Notion 与 Linear（RUT-42）。'
+          channel: '记忆回溯 · MCP',
+          citation: '命中周二硬件评审记录（10:42）',
+          body: '对比四款阳极氧化铝配色后，银色款与 MacBook Air 侧边铝金属机身视觉一体感最强，且 Leo 可在周四中午前优先交付银色测试包（已归档至 Linear RUT-42）。'
         },
         en: {
-          channel: 'Decision lookup · MCP',
-          citation: 'Matched Design Review · 3d ago (10:42)',
-          body: 'Silver matched the MacBook Air aluminum edge most naturally and Leo could ship the Silver build by Thursday noon. Logged in Notion and Linear (RUT-42).'
+          channel: 'Context Lookup · MCP',
+          citation: 'Matched Tuesday Hardware Review (10:42)',
+          body: 'Silver blended most seamlessly into the MacBook Air aluminum edge and Leo could deliver the Silver firmware build by Thursday noon (logged in Linear RUT-42).'
         }
       }
     };
@@ -1721,24 +1485,9 @@
     state.agentPreset = presetId;
     state.agentApproved = false;
     state.agentResult = chosen;
-    renderCurrentView();
   }
 
-  function runAgentCustom(promptText, linkedDec = null) {
-    const dec = linkedDec || state.decisions[0];
-    state.agentPreset = null;
-    state.agentApproved = false;
-    state.agentResult = {
-      channel: state.lang === 'zh' ? '草稿 · MCP' : 'Draft · MCP',
-      citation: state.lang === 'zh' ? `引用决定：${pick(dec.title)}` : `Cited: ${pick(dec.title)}`,
-      body: state.lang === 'zh'
-        ? `依据指令「${promptText}」整理如下：\n\n• 决定内容：${pick(dec.title)}\n• 负责人：${memberById(dec.ownerId)?.name || '待指派'} · 节点：${pick(dec.due)}`
-        : `Draft for "${promptText}":\n\n• Decision: ${pick(dec.title)}\n• Owner: ${memberById(dec.ownerId)?.name || 'Unassigned'} · Due: ${pick(dec.due)}`
-    };
-    renderCurrentView();
-  }
-
-  /* ---------- Enrollment & Delete Modals ---------- */
+  /* ---------- Enrollment & Delete Sheet Modals ---------- */
   function openEnrollModal(memberId = null) {
     reenrollMemberId = memberId;
     sampledVoiceReady = false;
@@ -1752,7 +1501,7 @@
     $('#enroll-name').disabled = Boolean(m);
 
     const fin = m ? m.finish : 'silver';
-    $$('#enroll-finish-selector .finish-btn').forEach((c) => c.classList.toggle('is-selected', c.dataset.finish === fin));
+    $$('#enroll-finish-selector .finish-pill').forEach((c) => c.classList.toggle('is-selected', c.dataset.finish === fin));
 
     updateEnrollQuote(m ? m.name : '');
     const box = $('#voice-capture-box');
@@ -1760,7 +1509,7 @@
     $('#vc-status-text').textContent = t('vcIdle');
     $('#btn-sample-label').textContent = t('vcStartBtn');
     $('#enroll-save').disabled = true;
-    $('#vc-wave').innerHTML = Array.from({ length: 26 }, () => '<span></span>').join('');
+    $('#vc-wave').innerHTML = Array.from({ length: 28 }, () => '<span></span>').join('');
     $('#enroll-modal').hidden = false;
     if (!m) $('#enroll-name').focus();
   }
@@ -1792,19 +1541,19 @@
         ticks += 1;
         if (analyser && arr) analyser.getByteFrequencyData(arr);
         bars.forEach((bar, i) => {
-          const v = arr ? Math.max(6, Math.min(34, (arr[i % arr.length] / 255) * 38)) : 6 + Math.round(Math.random() * 26);
+          const v = arr ? Math.max(5, Math.min(30, (arr[i % arr.length] / 255) * 34)) : 5 + Math.round(Math.random() * 24);
           bar.style.height = `${v}px`;
         });
-        if (ticks >= 24) {
+        if (ticks >= 22) {
           stopVoiceSampling();
           sampledVoiceReady = true;
           box.dataset.state = 'done';
           $('#vc-status-text').textContent = t('vcDone');
           $('#btn-sample-label').textContent = t('vcResampleBtn');
           $('#enroll-save').disabled = false;
-          bars.forEach((bar, i) => { bar.style.height = `${10 + ((i * 17 + 5) % 18)}px`; });
+          bars.forEach((bar, i) => { bar.style.height = `${9 + ((i * 17 + 5) % 18)}px`; });
         }
-      }, 105);
+      }, 100);
     };
 
     if (useRealMic && navigator.mediaDevices?.getUserMedia) {
@@ -1819,7 +1568,7 @@
           run(analyser);
         })
         .catch(() => {
-          showToast(state.lang === 'zh' ? '未获取麦克风权限，已使用模拟采样' : 'Mic unavailable — using simulated sample');
+          showToast(state.lang === 'zh' ? '未获取麦克风权限，已切换模拟采样' : 'Using simulated voice sample');
           run(null);
         });
     } else {
@@ -1829,11 +1578,11 @@
 
   function saveEnrolledMember() {
     if (!sampledVoiceReady) return;
-    const name = $('#enroll-name').value.trim() || (state.lang === 'zh' ? '新成员' : 'New Member');
+    const name = $('#enroll-name').value.trim() || (state.lang === 'zh' ? '新成员' : 'New Teammate');
     const role = $('#enroll-role').value.trim() || (state.lang === 'zh' ? '产品研发' : 'Product');
     const email = $('#enroll-email').value.trim() || `${name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'member'}@northstar.co`;
-    const finish = $('#enroll-finish-selector .finish-btn.is-selected')?.dataset.finish || 'silver';
-    const bars = Array.from({ length: 10 }, () => 34 + Math.round(Math.random() * 58));
+    const finish = $('#enroll-finish-selector .finish-pill.is-selected')?.dataset.finish || 'silver';
+    const bars = Array.from({ length: 12 }, () => 36 + Math.round(Math.random() * 58));
 
     if (reenrollMemberId) {
       const m = memberById(reenrollMemberId);
@@ -1843,13 +1592,14 @@
         m.finish = finish;
         m.bars = bars;
         m.active = true;
-        m.lastHeard = { zh: '刚刚更新', en: 'Updated now' };
+        m.lastHeard = { zh: '刚刚校准', en: 'Just calibrated' };
         showToast(state.lang === 'zh' ? `已更新 ${m.name} 的声纹` : `Updated ${m.name}’s voiceprint`);
       }
     } else {
-      const initials = name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase() || 'NB';
+      const initials = name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase() || 'NS';
+      const newId = 'm-' + Date.now();
       state.members.unshift({
-        id: 'm-' + Date.now(),
+        id: newId,
         name,
         email,
         role: { zh: role, en: role },
@@ -1857,15 +1607,15 @@
         initials,
         finish,
         barState: 'online',
-        lastHeard: { zh: '刚刚录入', en: 'Just enrolled' },
-        active: true,
-        allowPeerCapture: true,
-        tempPauseMinutes: 0,
-        requireMyConfirm: true,
+        visibility: 'team',
+        requireConfirm: true,
         lidStandby: true,
+        active: true,
+        lastHeard: { zh: '刚刚加入', en: 'Just enrolled' },
         bars
       });
-      showToast(state.lang === 'zh' ? `已添加 ${name} 至声纹白名单` : `Added ${name} to voiceprint roster`);
+      state.selectedSeatId = newId;
+      showToast(state.lang === 'zh' ? `${name} 已加入团队声纹圈` : `Added ${name} to voiceprint circle`);
     }
     $('#enroll-modal').hidden = true;
     renderAll();
@@ -1875,7 +1625,7 @@
     const m = memberById(memberId);
     if (!m) return;
     pendingDeleteMemberId = memberId;
-    $('#delete-desc').textContent = state.lang === 'zh' ? `确定移除 ${m.name} 的声纹吗？` : `Remove ${m.name}’s voiceprint?`;
+    $('#delete-desc').textContent = state.lang === 'zh' ? `确认将 ${m.name} 移出声纹圈并销毁声纹吗？` : `Destroy ${m.name}’s voiceprint?`;
     $('#delete-modal').hidden = false;
   }
 
@@ -1884,7 +1634,8 @@
     const idx = state.members.findIndex((m) => m.id === pendingDeleteMemberId);
     if (idx !== -1) {
       const removed = state.members.splice(idx, 1)[0];
-      showToast(state.lang === 'zh' ? `已移除 ${removed.name} 的声纹` : `Removed ${removed.name}’s voiceprint`);
+      if (state.selectedSeatId === removed.id) state.selectedSeatId = state.members[0]?.id || null;
+      showToast(state.lang === 'zh' ? `已销毁 ${removed.name} 的声纹` : `Destroyed ${removed.name}’s voiceprint`);
     }
     pendingDeleteMemberId = null;
     $('#delete-modal').hidden = true;
@@ -1894,19 +1645,21 @@
   /* ---------- Shot Director ---------- */
   function runDirectorShot(shot) {
     $('#director-drawer').hidden = true;
-    closeMemberDrawer();
     $('#floating-card').hidden = true;
+    $('#menubar-popover').hidden = true;
 
     if (shot === 'scenePeerBlock') {
       const leo = memberById('leo');
-      if (leo) { leo.active = true; leo.allowPeerCapture = false; leo.tempPauseMinutes = 0; }
+      if (leo) { leo.active = true; leo.visibility = 'self'; }
       state.currentEmployeeId = 'leo';
-      switchRole('employee', 'my-voice');
-      showPrivacyNotice(true);
+      switchRole('employee', 'today');
+      showPrivacyBanner('peer');
+    } else if (shot === 'sceneAdminCircle') {
+      state.selectedSeatId = 'maya';
+      switchRole('admin', 'circle');
     } else if (shot === 'sceneAdminLock') {
-      switchRole('admin', 'decisions');
       state.selectedDecisionId = 'dec-silver';
-      renderAll();
+      switchRole('admin', 'team-flow');
     } else if (shot === 'sceneA') {
       const dec = state.decisions.find((d) => d.id === 'dec-launch');
       if (dec) {
@@ -1916,56 +1669,64 @@
         state.selectedDecisionId = dec.id;
       }
       state.currentEmployeeId = 'leo';
-      state.hwState = 'input';
-      switchRole('employee', 'my-decisions');
-      showDecisionNotice('dec-launch');
+      switchRole('employee', 'today');
+      showDecisionBanner('dec-launch');
     } else if (shot === 'sceneC') {
       state.currentEmployeeId = 'maya';
       state.selectedDecisionId = 'dec-silver';
-      switchRole('employee', 'my-decisions');
+      switchRole('employee', 'today');
       startQuotePlayback('dec-silver');
-    } else if (shot === 'sceneD') {
-      switchRole('admin', 'devices');
-      setHardwareState('visitor');
-      showPrivacyNotice(false);
     } else if (shot === 'sceneS1') {
-      switchRole('admin', 'devices');
-      setHardwareState('mute');
+      const maya = memberById('maya');
+      if (maya) maya.barState = 'muted';
+      state.currentEmployeeId = 'maya';
+      state.hwStageView = 'macro';
+      playSwitchClick(true);
+      switchRole('employee', 'my-bar');
+    } else if (shot === 'sceneD') {
+      state.multiBarSync = false;
+      state.visitorGateDemo = true;
+      state.blockedToday += 1;
+      switchRole('admin', 'connections');
+      showPrivacyBanner('visitor');
     } else if (shot === 'sceneE') {
       state.currentEmployeeId = 'maya';
-      switchRole('employee', 'my-agent');
-      runAgentPreset('client-email');
+      state.selectedDecisionId = 'dec-launch';
+      state.inlineAgentDecId = 'dec-launch';
+      computeAgentPreset('client-email');
+      switchRole('employee', 'today');
     } else if (shot === 'sceneL4') {
       state.multiBarSync = true;
-      state.hwState = 'input';
-      switchRole('admin', 'devices');
+      state.visitorGateDemo = false;
+      switchRole('admin', 'connections');
     }
   }
 
-  /* ---------- Global Wiring ---------- */
+  /* ---------- Global Event Listeners ---------- */
   function initGlobalEvents() {
-    $$('.role-btn').forEach((b) => {
+    $$('.mac-seg-btn').forEach((b) => {
       b.addEventListener('click', () => switchRole(b.dataset.role));
     });
 
     $$('.lang-btn').forEach((b) => {
       b.addEventListener('click', () => {
         state.lang = b.dataset.lang;
-        if (state.agentResult) runAgentPreset(state.agentPreset || 'client-email');
+        if (state.agentResult) computeAgentPreset(state.agentPreset || 'client-email');
         renderAll();
       });
     });
 
+    $('#tl-zoom').addEventListener('click', () => {
+      state.windowZoomed = !state.windowZoomed;
+      syncChrome();
+    });
+
     $('#rail-device-status').addEventListener('click', () => {
-      state.activeTab = state.roleMode === 'employee' ? 'my-voice' : 'devices';
+      state.activeTab = state.roleMode === 'employee' ? 'my-bar' : 'connections';
       renderAll();
     });
 
-    $('#member-drawer-backdrop').addEventListener('click', (e) => {
-      if (e.target === $('#member-drawer-backdrop')) closeMemberDrawer();
-    });
-
-    // Native macOS Menu Bar Popover
+    // Menu Bar Companion Popover
     const mbBtn = $('#menubar-rutta-btn');
     const mbPop = $('#menubar-popover');
     mbBtn.addEventListener('click', (e) => {
@@ -1980,31 +1741,31 @@
         mbBtn.setAttribute('aria-expanded', 'false');
       }
     });
-    $('#mbp-toggle-peer').addEventListener('click', () => {
-      const emp = currentEmployee();
-      emp.allowPeerCapture = !emp.allowPeerCapture;
-      renderAll();
+    $$('#mbp-vis-grid .osmp-vis-btn').forEach((b) => {
+      b.addEventListener('click', () => {
+        setEmployeeVisibility(currentEmployee(), b.dataset.setVis, true);
+        if (b.dataset.setVis === 'self') showPrivacyBanner('peer');
+      });
     });
     $('#mbp-toggle-mute').addEventListener('click', () => {
       const emp = currentEmployee();
       emp.barState = emp.barState === 'muted' ? 'online' : 'muted';
-      setHardwareState(emp.barState === 'muted' ? 'mute' : 'ready');
-    });
-    $('#mbp-toggle-pause').addEventListener('click', () => {
-      const emp = currentEmployee();
-      emp.tempPauseMinutes = emp.tempPauseMinutes > 0 ? 0 : 30;
-      mbPop.hidden = true;
+      playSwitchClick(emp.barState === 'muted');
       renderAll();
     });
+    $('#mbp-latest-card').addEventListener('click', () => {
+      mbPop.hidden = true;
+      showDecisionBanner('dec-launch');
+    });
 
-    // Enroll modal
+    // Enroll & Delete Sheet Modals
     $('#enroll-close').addEventListener('click', () => { stopVoiceSampling(); $('#enroll-modal').hidden = true; });
     $('#enroll-cancel').addEventListener('click', () => { stopVoiceSampling(); $('#enroll-modal').hidden = true; });
     $('#enroll-modal').addEventListener('click', (e) => { if (e.target === $('#enroll-modal')) { stopVoiceSampling(); $('#enroll-modal').hidden = true; } });
     $('#enroll-name').addEventListener('input', (e) => updateEnrollQuote(e.target.value));
-    $$('#enroll-finish-selector .finish-btn').forEach((c) => {
+    $$('#enroll-finish-selector .finish-pill').forEach((c) => {
       c.addEventListener('click', () => {
-        $$('#enroll-finish-selector .finish-btn').forEach((x) => x.classList.remove('is-selected'));
+        $$('#enroll-finish-selector .finish-pill').forEach((x) => x.classList.remove('is-selected'));
         c.classList.add('is-selected');
       });
     });
@@ -2012,7 +1773,6 @@
     $('#btn-mic-sample').addEventListener('click', () => startVoiceSampling(true));
     $('#enroll-save').addEventListener('click', saveEnrolledMember);
 
-    // Delete modal
     $('#delete-close').addEventListener('click', () => { $('#delete-modal').hidden = true; });
     $('#delete-cancel').addEventListener('click', () => { $('#delete-modal').hidden = true; });
     $('#delete-confirm').addEventListener('click', confirmDeleteMember);
@@ -2020,25 +1780,25 @@
     // Director
     $('#director-trigger').addEventListener('click', () => { $('#director-drawer').hidden = !$('#director-drawer').hidden; });
     $('#director-close').addEventListener('click', () => { $('#director-drawer').hidden = true; });
-    $$('.dp-btn').forEach((b) => b.addEventListener('click', () => runDirectorShot(b.dataset.shot)));
+    $$('.dp-item').forEach((b) => b.addEventListener('click', () => runDirectorShot(b.dataset.shot)));
     $('#toggle-menubar').addEventListener('change', (e) => { state.showMenubar = e.target.checked; syncChrome(); });
+    $('#toggle-zoom').addEventListener('change', (e) => { state.windowZoomed = e.target.checked; syncChrome(); });
     $('#toggle-sound').addEventListener('change', (e) => { state.soundEnabled = e.target.checked; });
     $('#dd-clean-mode').addEventListener('click', () => {
       state.cleanShot = true;
       $('#director-drawer').hidden = true;
       syncChrome();
-      showToast(state.lang === 'zh' ? '已进入纯净录屏模式（按 H 恢复）' : 'Clean screen ON (press H to restore)');
+      showToast(state.lang === 'zh' ? '纯净录屏已开启（按 H 恢复）' : 'Clean screen ON (press H to restore)');
     });
     $('#dd-reset').addEventListener('click', () => {
       const keepLang = state.lang;
       stopQuotePlayback();
-      closeMemberDrawer();
       state = window.createInitialRuttaState();
       state.lang = keepLang;
       $('#floating-card').hidden = true;
       $('#director-drawer').hidden = true;
       renderAll();
-      showToast(state.lang === 'zh' ? '已重置演示数据' : 'Demo data reset');
+      showToast(state.lang === 'zh' ? '已重置演示数据' : 'Demo reset');
     });
 
     document.addEventListener('keydown', (e) => {
@@ -2049,7 +1809,6 @@
         $('#director-drawer').hidden = true;
         $('#floating-card').hidden = true;
         $('#menubar-popover').hidden = true;
-        closeMemberDrawer();
         stopVoiceSampling();
       } else if (e.key.toLowerCase() === 'h') {
         state.cleanShot = !state.cleanShot;
@@ -2065,12 +1824,12 @@
 
   window.addEventListener('load', () => {
     [
-      'assets/switch-photo-input.webp',
-      'assets/switch-photo-mute.webp',
-      'assets/hero-silver.webp',
-      'assets/hero-sky.webp',
-      'assets/hero-starlight.webp',
-      'assets/hero-midnight.webp',
+      'assets/openside-silver.webp',
+      'assets/openside-midnight.webp',
+      'assets/openside-sky.webp',
+      'assets/openside-starlight.webp',
+      'assets/macro-ready.webp',
+      'assets/macro-mute.webp',
       'assets/closedside-1200.webp'
     ].forEach((src) => { const im = new Image(); im.src = src; });
   });
